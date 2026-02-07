@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Fox Macro Recorder",
-  "version": "2.0.0",
-  "description": "Cleverly record and replay your clicks like a sly fox - automate repetitive tasks with precision!",
+  "name": "Fox Auto Clicker",
+  "version": "2.0.1",
+  "description": "Create and run browser macros to automate repetitive web tasks.",
   "permissions": [
     "storage"
   ],
