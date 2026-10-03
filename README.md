@@ -261,7 +261,7 @@ Access via the ⚙️ button in the main panel:
 - **No Data Collection** - Zero tracking, analytics, or telemetry
 - **No External Scripts** - All code self-contained in extension
 - **Browser-Only Storage** - Uses chrome.storage.local API
-- **No Permissions Abuse** - Only requires 'storage' permission
+- **Minimal Permissions** - `storage`, `activeTab`, `scripting`; no access to any site until you open the panel there
 - **Open Source** - All code visible and reviewable
 - **No Login Required** - Works completely offline after installation
 
@@ -306,29 +306,29 @@ Access via the ⚙️ button in the main panel:
 ## Technical Details
 
 - **Manifest Version**: 3 (Latest Chrome Extension standard)
-- **Permissions**: Storage only (to save your macros)
+- **Permissions**: `storage` (save macros), `activeTab` + `scripting` (inject the panel into the current tab when you press the popup button)
 - **Works On**: All URLs (you choose where to use it)
 - **Storage**: Chrome local storage API
-- **File Format**: JSON for import/export
 
 ## File Structure
 
 ```
 fox-macro-recorder/
 ├── manifest.json          # Extension configuration
-├── content-main.js        # Main entry point
-├── utils.js               # Utility functions
-├── recording.js           # Recording logic
-├── playback.js            # Playback logic
-├── macros.js              # Macro operations
-├── panels/
-│   ├── main-panel.js     # Main recorder panel
-│   ├── edit-panel.js     # Macro editor
-│   ├── inspector-panel.js # Position inspector
-│   └── settings-panel.js  # Settings configuration
+├── content/               # Injected into the current tab on demand
+│   ├── main.js            # Entry point: shared state, shadow root, renderMode()
+│   ├── store.js           # The only code touching chrome.storage
+│   ├── utils.js           # html`` escaping, dragging, selectors, click feedback
+│   ├── styles.js          # Panel CSS
+│   ├── recording.js       # Recording logic
+│   ├── playback.js        # Playback logic
+│   ├── macros.js          # Macro list + CRUD
+│   ├── panels/            # main, edit, inspector, settings
+│   └── components/        # fab, toast
 ├── popup/
-│   ├── popup.html        # Extension popup UI
-│   └── popup.js          # Popup logic
+│   ├── popup.html         # Extension popup UI
+│   └── popup.js           # Toggle button; injects content/ (file list lives here)
+├── tests/                 # node --test tests/*.test.mjs
 └── icons/
     ├── icon16.png        # Extension icons
     ├── icon48.png
@@ -354,15 +354,14 @@ fox-macro-recorder/
 **Permissions Requested:**
 1. **`storage`** - Required to save user-recorded macros locally in the browser's storage. Users can create, save, and manage multiple macros that persist across browser sessions.
 
-2. **Content Script on `<all_urls>`** - The content script must run on all websites because users need to record and replay clicks on any webpage they choose. The extension cannot predict which sites users will automate, so it must be available everywhere. The content script only activates when users explicitly show the panel.
+2. **`activeTab` + `scripting`** - When the user presses the button in the extension popup, the recorder panel is injected into that one tab so they can record and replay clicks there. Nothing is injected into any page until the user does this, and the extension has no standing access to any website.
 
 **Privacy Guarantees:**
 - ✅ All data stored locally in browser (chrome.storage.local)
 - ✅ No external servers or network connections
 - ✅ No data collection, tracking, or analytics
 - ✅ No user data sharing or transmission
-- ✅ Content script is passive until user activates it
-- ✅ Panel hidden by default to avoid interference
+- ✅ Nothing runs on a page until the user opens the panel from the popup
 
 **Remote Code:**
 - ❌ **NO remote code used** - All code is packaged within the extension

@@ -53,12 +53,10 @@ We do not:
 ### Storage Permission
 Required to save your recorded macros locally in your browser. Without this permission, the extension cannot function.
 
-### Content Script Access (all_urls)
-Required to record and replay clicks on any website you choose. The content script:
-- Only runs on pages you actively visit
-- Only activates when you explicitly open the recording panel
+### Active Tab and Scripting Permissions
+Required to record and replay clicks on a website you choose. When you press the button in the extension popup, the recorder panel is added to that tab only. The extension:
+- Has no access to any website until you open the panel there
 - Does not collect or transmit any website data
-- Is hidden by default and user-controlled
 
 ## Third-Party Services
 
