@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { APP_NAME, REPO_URL, VERSION } from "./site";
+import { APP_NAME, REPO_URL, STORE_URL, VERSION } from "./site";
 import { StoreButton } from "./store-button";
 
+// `wide` = the long label, swapped for `label` on phones so the header stays one row
 const LINKS = [
-  { href: "/#features", label: "Features" },
   { href: "/playground/", label: "Playground" },
-  { href: "/moved/", label: "Moving from old Fox" },
+  { href: "/moved/", label: "Moved?", wide: "Moving from old Fox" },
 ];
 
 // No client JS: on narrow screens the links wrap under the logo instead of a burger menu
@@ -18,12 +18,19 @@ export function Navbar() {
           <span>FOX MACRO</span>
         </Link>
         <nav className="nav-links" aria-label="Main">
-          {LINKS.map(({ href, label }) => (
+          {LINKS.map(({ href, label, wide }) => (
             <Link key={href} href={href}>
-              {label}
+              {wide ? (
+                <>
+                  <span className="wide">{wide}</span>
+                  <span className="narrow">{label}</span>
+                </>
+              ) : (
+                label
+              )}
             </Link>
           ))}
-          <StoreButton small />
+          {STORE_URL ? <StoreButton small /> : null}
         </nav>
       </div>
     </header>
@@ -39,7 +46,6 @@ export function Footer() {
         </p>
         <nav className="footer-links" aria-label="Footer">
           <Link href="/privacy/">Privacy</Link>
-          <Link href="/moved/">Moving from old Fox</Link>
           <a href={REPO_URL} target="_blank" rel="noopener">
             Source
           </a>

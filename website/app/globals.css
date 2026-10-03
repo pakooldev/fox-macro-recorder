@@ -36,7 +36,7 @@ h1, h2, h3, .pixel {
   letter-spacing: 0.5px;
   margin: 0;
 }
-h1 { font-size: clamp(32px, 6vw, 48px); }
+h1 { font-size: clamp(32px, 6vw, 48px); text-wrap: balance; }
 h2 { font-size: clamp(24px, 4vw, 32px); }
 h3 { font-size: 20px; }
 .label {
@@ -103,6 +103,12 @@ kbd {
 .nav-links { display: flex; align-items: center; gap: 4px 20px; flex-wrap: wrap; font: 16px/1 var(--fox-font-pixel); }
 .nav-links a:not(.btn) { color: var(--px-black); text-decoration: none; padding: 6px 0; border-bottom: 2px solid transparent; }
 .nav-links a:not(.btn):hover { border-bottom-color: var(--px-orange); }
+.nav-links .narrow { display: none; }
+@media (max-width: 600px) {
+  .nav-inner { flex-wrap: nowrap; }
+  .nav-links .wide { display: none; }
+  .nav-links .narrow { display: inline; }
+}
 
 .footer { border-top: 2px solid var(--px-black); padding: 24px 0; color: var(--fox-text-2); font-size: 15px; }
 .footer-inner { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; align-items: center; }
@@ -122,8 +128,7 @@ kbd {
 .hero-copy .label { color: var(--px-peach); }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
 .hero .btn.is-disabled { color: var(--px-cream); border-color: var(--px-cream); background: transparent; }
-.hero-note { font-size: 15px !important; color: var(--px-silver) !important; }
-.hero-note .keys { margin: 0 2px; }
+.hero-soon { color: var(--px-silver) !important; }
 /* Under ~900px the empty sky is too small for the text: stack text over the art,
    cropped to its right half where the fox is */
 @media (max-width: 900px) {
@@ -144,20 +149,36 @@ kbd {
   background: var(--chip, var(--px-orange));
 }
 
-/* How it works: 3 steps with the mascot in each state */
-.steps { counter-reset: step; }
-.step { justify-items: start; gap: 12px; }
-.step .label::before { counter-increment: step; content: "Step " counter(step) " · "; }
-.step-fox { width: 116px; height: 116px; display: flex; align-items: end; }
+.card-title { font-size: 20px; }
+
+/* Demo: real panel screenshot (scripts/capture.mjs) + the 3 steps as mascot rows */
+.demo { display: grid; grid-template-columns: minmax(0, 3fr) minmax(220px, 1fr); gap: 32px; align-items: center; }
+.demo-shot { width: 100%; height: auto; } /* cream like the page: the panel floats on it as on a real site */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 20px; }
+.steps li { display: flex; align-items: center; gap: 16px; }
+.steps li > div { display: grid; gap: 4px; }
+.step-title { font-size: 24px; }
+@media (max-width: 800px) {
+  .demo { grid-template-columns: 1fr; }
+  .steps { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .steps li { flex-direction: column; align-items: start; gap: 4px; font-size: 15px; }
+  .step-title { font-size: 20px; }
+}
+
+.features { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+.features li { display: flex; align-items: center; gap: 12px; padding: 14px 16px; font: 16px/1.3 var(--fox-font-pixel); }
+.also { margin: 16px 0 0; color: var(--fox-text-2); }
 
 .callout {
-  display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
-  padding: 20px 24px; background: var(--px-peach);
+  display: flex; align-items: center; gap: 20px;
+  padding: 20px 24px; background: var(--px-peach); color: var(--px-black); text-decoration: none;
 }
-.callout > div { flex: 1 1 200px; display: grid; gap: 4px; }
-.callout p { margin: 0; }
+.callout:hover { color: var(--px-black); outline: 2px solid var(--px-black); outline-offset: -8px; }
+.callout > div { display: grid; gap: 6px; }
+.callout-link { font: 16px/1 var(--fox-font-pixel); color: var(--fox-link); }
 
-.limits { margin: 0; padding-left: 20px; display: grid; gap: 6px; color: var(--fox-text-2); }
+.limits { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; color: var(--fox-text-2); }
+.limits li { display: flex; align-items: center; gap: 10px; }
 
 /* ---------- Text pages (privacy, moved) ---------- */
 .page-head { padding: 56px 0 32px; display: grid; gap: 12px; }
@@ -174,14 +195,16 @@ kbd {
 /* 115×66 art at whole-pixel scales (4×, 3× on phones), on its own night sky like the hero */
 .moved-art { width: 460px; max-width: 100%; height: auto; image-rendering: pixelated; border: 2px solid var(--px-black); box-shadow: 4px 4px 0 var(--px-black); background: var(--web-night); margin-bottom: 12px; }
 @media (max-width: 520px) { .moved-art { width: 345px; } }
-.howto { display: grid; gap: 16px; margin: 0 0 32px; padding: 0; list-style: none; counter-reset: howto; max-width: 760px; }
+.howto { display: grid; gap: 16px; margin: 0 0 16px; padding: 0; list-style: none; counter-reset: howto; max-width: 760px; }
 .howto li { display: grid; grid-template-columns: 48px 1fr; gap: 16px; padding: 20px; counter-increment: howto; }
 .howto li::before {
   content: counter(howto);
   display: flex; align-items: center; justify-content: center; width: 48px; height: 48px;
   font: 24px/1 var(--fox-font-pixel); background: var(--px-orange); border: 2px solid var(--px-black);
 }
-.howto h3 { margin-bottom: 4px; }
+.howto h2 { font-size: 20px; margin-bottom: 8px; }
+.howto-shot { width: 360px; max-width: 100%; height: auto; margin-top: 12px; border: 2px solid var(--px-black); }
+.howto-after { margin: 0 0 32px; color: var(--fox-text-2); }
 .howto p { margin: 0; color: var(--fox-text-2); }
 .faq { display: grid; gap: 12px; max-width: 760px; margin-bottom: 72px; }
 .faq details { padding: 14px 20px; }
@@ -192,6 +215,13 @@ kbd {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* Icon strips: playground "how to", privacy TL;DR */
+.strip { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font: 16px/1 var(--fox-font-pixel); }
+.strip li { display: flex; align-items: center; gap: 6px; }
+.strip li + li::before { content: "→"; margin-right: 6px; color: var(--fox-text-2); }
+.tldr { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 12px; }
+.tldr li { display: flex; align-items: center; gap: 8px; padding: 10px 14px; font: 16px/1 var(--fox-font-pixel); }
 
 /* ---------- Playground ---------- */
 .playground { margin-bottom: 72px; }

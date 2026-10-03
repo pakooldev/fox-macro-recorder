@@ -1,12 +1,12 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import type { Metadata } from "next";
-import { Icon, Mascot } from "@/components/pixel";
+import { Mascot } from "@/components/pixel";
 import { StoreButton } from "@/components/store-button";
 
 export const metadata: Metadata = {
   title: "Fox has moved",
-  description: "Fox Auto Clicker is now Fox Macro Recorder, on a new Chrome Web Store listing. How to move your macros.",
+  description: "Fox Auto Clicker is now Fox Macro Recorder. Move your macros in 3 steps.",
 };
 
 // The illustration is optional (assets/ASSETS.md W1); the running fox stands in until it exists
@@ -21,71 +21,45 @@ export default function Moved() {
         ) : (
           <Mascot state="play" big />
         )}
-        <span className="label">For Fox Auto Clicker users</span>
         <h1>Fox has moved house</h1>
-        <p>
-          “Fox Auto Clicker” is now <strong>Fox Macro Recorder</strong>, with a new look and a new home on the Chrome
-          Web Store. Chrome can’t move an extension between store listings, so the new Fox is a separate install and
-          starts empty. Your macros come along in a minute:
-        </p>
+        <p>Fox Auto Clicker is now Fox Macro Recorder. It’s a new install, so bring your macros over in 3 steps.</p>
       </div>
 
       <ol className="howto">
         <li className="raised">
           <div>
-            <h3>Install the new Fox</h3>
-            <p>Keep the old one for now: your macros are still inside it.</p>
-            <p style={{ marginTop: 12 }}>
-              <StoreButton small />
+            <h2>Install the new Fox</h2>
+            <StoreButton small />
+          </div>
+        </li>
+        <li className="raised">
+          <div>
+            <h2>Export from the old Fox</h2>
+            <p>
+              Open the old Fox and press <strong>Export macros</strong>.
             </p>
           </div>
         </li>
         <li className="raised">
           <div>
-            <h3>Export from the old Fox</h3>
+            <h2>Import into the new Fox</h2>
             <p>
-              Open the old Fox on any page and press <strong>Export macros</strong> in its banner. A file named like{" "}
-              <code>fox-macros-2026-10-03.json</code> is saved to your Downloads.
+              <strong>Settings → Macros → Import…</strong>, then pick the file.
             </p>
-          </div>
-        </li>
-        <li className="raised">
-          <div>
-            <h3>Import into the new Fox</h3>
-            <p>
-              Open the new Fox, go to <Icon name="settings" size={16} /> <strong>Settings → Macros → Import…</strong> and pick
-              that file. Macros already there are skipped, so importing twice is harmless.
-            </p>
-          </div>
-        </li>
-        <li className="raised">
-          <div>
-            <h3>Remove the old Fox</h3>
-            <p>
-              Check your macros are all in the new Fox, then remove the old one from <code>chrome://extensions</code>.
-              Removing it deletes the copy inside it.
-            </p>
+            <img className="howto-shot" src="/assets/web/import.png" width={360} height={362} alt="The Import button in the new Fox's Settings tab" />
           </div>
         </li>
       </ol>
+      <p className="howto-after">All there? Now you can remove the old Fox. Keep it until then.</p>
 
       <section className="faq">
-        <h2 style={{ marginBottom: 8 }}>Questions</h2>
         <details className="raised">
-          <summary>Why not just update the old one?</summary>
-          <p>The extension moved to a new developer account, and the Chrome Web Store has no way to transfer an existing listing’s users to another one.</p>
+          <summary>I don’t see Export in the old Fox</summary>
+          <p>Open chrome://extensions, turn on Developer mode, press Update.</p>
         </details>
         <details className="raised">
-          <summary>Will I lose my macros?</summary>
-          <p>No. They stay in the old Fox until you remove it, so you can export again any time before that.</p>
-        </details>
-        <details className="raised">
-          <summary>I don’t see an Export button in the old Fox</summary>
-          <p>Chrome updates extensions on its own every few hours. To get it now, open chrome://extensions, turn on Developer mode and press Update.</p>
-        </details>
-        <details className="raised">
-          <summary>Do my macros work the same in the new Fox?</summary>
-          <p>Yes. The file format is the same, and every macro keeps its clicks, timing, loops and delay.</p>
+          <summary>Why a new install?</summary>
+          <p>Chrome can’t move users between store listings.</p>
         </details>
       </section>
     </main>

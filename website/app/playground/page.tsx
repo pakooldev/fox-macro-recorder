@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Keys } from "@/components/pixel";
+import { Icon, Keys } from "@/components/pixel";
 import { SHORTCUT } from "@/components/site";
 import { Targets } from "./targets";
 
@@ -12,12 +12,19 @@ export default function Playground() {
   return (
     <main className="container">
       <div className="page-head">
-        <span className="label">Playground</span>
         <h1>Try Fox here</h1>
-        <p>
-          Open Fox on this page (toolbar icon or <Keys combo={SHORTCUT} />), press Record, click some targets below, then
-          Stop, save and Play. The counters show what the replay clicked.
-        </p>
+        <ol className="strip" aria-label="How to try it">
+          <li>
+            <Keys combo={SHORTCUT} />
+          </li>
+          <li>
+            <Icon name="record" /> Record
+          </li>
+          <li>Click targets</li>
+          <li>
+            <Icon name="play" /> Play
+          </li>
+        </ol>
       </div>
       <Targets />
     </main>

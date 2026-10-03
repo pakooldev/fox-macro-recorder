@@ -40,8 +40,7 @@ export function Targets() {
   return (
     <div className="grid playground">
       <section className="card raised">
-        <h3>Counters</h3>
-        <p>Each button counts its clicks.</p>
+        <h2 className="card-title">Counters</h2>
         <div className="pg-buttons">
           {BUTTONS.map((b) => (
             <button key={b.id} id={`pg-${b.id}`} className={`btn ${b.cls}`} onClick={() => setCounts((c) => ({ ...c, [b.id]: (c[b.id] ?? 0) + 1 }))}>
@@ -52,8 +51,8 @@ export function Targets() {
       </section>
 
       <section className="card raised">
-        <h3>In order</h3>
-        <p>Hit 1 to 5 in order. A wrong tile starts over. Solved: <strong className="pixel">{solved}</strong></p>
+        <h2 className="card-title">1 to 5 in order</h2>
+        <p>Solved: <strong className="pixel">{solved}</strong></p>
         <div className="pg-tiles">
           {ORDER.map((n) => (
             <button key={n} id={`pg-tile-${n}`} className={`pg-tile${n < next ? " is-done" : ""}`} onClick={() => hitTile(n)}>
@@ -64,7 +63,7 @@ export function Targets() {
       </section>
 
       <section className="card raised pg-feed">
-        <h3>Feed the fox</h3>
+        <h2 className="card-title">Feed the fox</h2>
         <p>
           Snacks: <strong className="pixel">{fed}</strong>
         </p>
@@ -75,7 +74,7 @@ export function Targets() {
 
       <div className="pg-reset">
         <button className="btn btn-small" onClick={reset}>
-          Reset counters
+          Reset
         </button>
       </div>
     </div>

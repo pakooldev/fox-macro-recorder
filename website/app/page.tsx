@@ -1,30 +1,22 @@
 import Link from "next/link";
 import { Icon, Keys, Mascot, type IconName } from "@/components/pixel";
-import { SHORTCUT } from "@/components/site";
+import { SHORTCUT, STORE_URL } from "@/components/site";
 import { StoreButton } from "@/components/store-button";
 
-const FEATURES: { icon: IconName; color: string; title: string; text: string }[] = [
-  { icon: "record", color: "var(--px-red)", title: "Record clicks", text: "Press Record and click around the page. Fox marks every click and keeps the timing between them." },
-  { icon: "repeat", color: "var(--px-blue)", title: "Play and loop", text: "Replay a macro once or up to 999 times, with a pause between loops. Stop cuts it short at any moment." },
-  { icon: "shuffle", color: "var(--px-yellow)", title: "Random delay", text: "Add a little random wait to every step so a replay doesn't run like clockwork." },
-  { icon: "target", color: "var(--px-green)", title: "Inspector", text: "Point at anything on the page to see its tag, id and position before you record." },
-  { icon: "download", color: "var(--px-peach)", title: "Export and import", text: "Save your macros to a file and load them on another computer or browser profile." },
-  { icon: "archive", color: "var(--px-silver)", title: "Stays on your device", text: "No account, no servers, no tracking. Macros live in your browser and only run where you open Fox." },
+const STEPS: { fox: "idle" | "record" | "play"; title: string; body: React.ReactNode }[] = [
+  { fox: "idle", title: "Open", body: <Keys combo={SHORTCUT} /> },
+  { fox: "record", title: "Record", body: "Click around, then Stop" },
+  { fox: "play", title: "Play", body: "Loop it up to 999×" },
 ];
 
-const STEPS: { fox: "idle" | "record" | "play"; title: string; text: React.ReactNode }[] = [
-  {
-    fox: "idle",
-    title: "Open Fox",
-    text: (
-      <>
-        Click the fox in the toolbar or press <Keys combo={SHORTCUT} /> (Option on a Mac). The panel opens on that page only.
-      </>
-    ),
-  },
-  { fox: "record", title: "Record", text: "Press Record, do your clicks, press Stop, then give the macro a name." },
-  { fox: "play", title: "Play", text: "Pick the macro, set how many loops and the delay, and press Play. The fox runs while it works." },
+const FEATURES: { icon: IconName; color: string; title: string }[] = [
+  { icon: "record", color: "var(--px-red)", title: "Keeps click timing" },
+  { icon: "repeat", color: "var(--px-blue)", title: "Loops with delays" },
+  { icon: "download", color: "var(--px-peach)", title: "Export to a file" },
+  { icon: "archive", color: "var(--px-silver)", title: "No account, no tracking" },
 ];
+
+const LIMITS = ["Clicks only, no typing", "Same window size and scroll", "Not on chrome:// pages"];
 
 export default function Home() {
   return (
@@ -32,87 +24,84 @@ export default function Home() {
       <section className="hero">
         <div className="hero-inner">
           <div className="hero-copy">
-            <span className="label">Chrome extension</span>
-            <h1>Record your clicks. Let the fox replay them.</h1>
-            <p>Fox Macro Recorder automates repetitive clicking on any web page, right from a little pixel panel.</p>
+            <h1>Record clicks. Replay them.</h1>
+            <p>A Chrome extension that repeats your clicks on any page.</p>
             <div className="hero-actions">
-              <StoreButton />
-              <Link className="btn btn-blue" href="/playground/">
+              {STORE_URL ? <StoreButton /> : null}
+              <Link className={`btn ${STORE_URL ? "btn-blue" : "btn-primary"}`} href="/playground/">
                 <Icon name="play" /> Try the playground
               </Link>
             </div>
+            {STORE_URL ? null : <span className="label hero-soon">Coming soon to the Chrome Web Store</span>}
           </div>
           <img
             className="hero-art"
             src="/assets/store/promo-marquee-1400x560.png"
             width={1400}
             height={560}
-            alt="The pixel fox at its retro computer, with macro cards floating above the desk"
+            alt="Pixel fox at a computer with macro cards"
           />
         </div>
       </section>
 
       <section className="section" id="features">
-        <div className="container">
-          <div className="section-head">
-            <span className="label">Features</span>
-            <h2>Small panel, everything you need</h2>
-          </div>
-          <div className="grid">
-            {FEATURES.map((f) => (
-              <article className="card raised" key={f.title}>
-                <h3>
-                  <span className="chip" style={{ "--chip": f.color } as React.CSSProperties}>
-                    <Icon name={f.icon} />
-                  </span>
-                  {f.title}
-                </h3>
-                <p>{f.text}</p>
-              </article>
+        <div className="container demo">
+          <img
+            className="demo-shot"
+            src="/assets/web/panel.png"
+            width={732}
+            height={502}
+            alt="The Fox panel replaying a macro on the playground page"
+          />
+          <ol className="steps">
+            {STEPS.map((s) => (
+              <li key={s.title}>
+                <Mascot state={s.fox} />
+                <div>
+                  <h2 className="step-title">{s.title}</h2>
+                  <span>{s.body}</span>
+                </div>
+              </li>
             ))}
-          </div>
+          </ol>
         </div>
       </section>
 
-      <section className="section" id="how-it-works" style={{ paddingTop: 0 }}>
+      <section className="section" style={{ paddingTop: 0 }}>
         <div className="container">
-          <div className="section-head">
-            <span className="label">How it works</span>
-            <h2>Three steps</h2>
-          </div>
-          <div className="grid steps">
-            {STEPS.map((s) => (
-              <article className="card raised step" key={s.title}>
-                <span className="step-fox">
-                  <Mascot state={s.fox} big />
+          <ul className="features">
+            {FEATURES.map((f) => (
+              <li className="raised" key={f.title}>
+                <span className="chip" style={{ "--chip": f.color } as React.CSSProperties}>
+                  <Icon name={f.icon} />
                 </span>
-                <span className="label">{s.title}</span>
-                <p>{s.text}</p>
-              </article>
+                {f.title}
+              </li>
             ))}
-          </div>
+          </ul>
+          <p className="also">Also: random delay, element inspector, keyboard shortcut.</p>
         </div>
       </section>
 
       <section className="section" style={{ paddingTop: 0 }}>
         <div className="container grid grid-2">
           <article className="card raised">
-            <h3>Good to know</h3>
+            <h2 className="card-title">Good to know</h2>
             <ul className="limits">
-              <li>Fox records clicks only: no typing, scrolling or dragging yet.</li>
-              <li>Clicks are replayed at the same spot in the window, so play a macro with the page scrolled, zoomed and sized as when you recorded it.</li>
-              <li>Fox can't run on Chrome's own pages (chrome://, the Web Store); the toolbar icon shows a ! there.</li>
+              {LIMITS.map((l) => (
+                <li key={l}>
+                  <Icon name="info" size={20} /> {l}
+                </li>
+              ))}
             </ul>
           </article>
-          <article className="callout raised">
+          <Link href="/moved/" className="callout raised">
             <Mascot state="play" big />
             <div>
-              <h3>Used “Fox Auto Clicker” before?</h3>
-              <p>
-                Fox has a new home on the Chrome Web Store. <Link href="/moved/">Here’s how to bring your macros along.</Link>
-              </p>
+              <h2 className="card-title">Used Fox Auto Clicker?</h2>
+              <span className="callout-link">Move your macros →</span>
             </div>
-          </article>
+          </Link>
         </div>
       </section>
     </main>
