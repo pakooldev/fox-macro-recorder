@@ -31,3 +31,7 @@ build/
 # Personal notes
 notes.txt
 TODO.txt
+
+# Raw AI image outputs (cleaned versions go to assets/sprites/ and icons/)
+assets/raw/
+__pycache__/
