@@ -189,10 +189,12 @@ Appears after a recording stops. Two inset inputs (name, domain), a silver "Disc
 
 ### 3.6 Settings tab
 
-- Section label (pixel 14px uppercase stone).
-- **Toggle:** a `<button role="switch" aria-checked>` (keyboard: Tab + Space): 36×20 white inset track, 12×12 square knob; off = stone knob on the left, on = green track + white knob with black outline on the right; moves with `--fox-step-fast`.
-- Range row: two 64px inset number inputs + `ms`.
-- About: version from the manifest and the current show/hide shortcut (from `chrome.commands`, via `background.js`) in pixel 14px; "Buy me a coffee" as a brown text link with a dotted 2px underline on hover.
+Three cards, each a little game window: white body, black 2px border, 2px drop shadow, and a silver title strip (icon + pixel 14px uppercase title, stone bottom bevel).
+
+- **Playback** (shuffle icon): "Random delay" (pixel 16px) with the switch on the right; a one-line hint in the UI font (stone, 13px) saying what it does; `MIN [ ] MAX [ ] ms` underneath. While the switch is off, min/max are disabled and drawn in silver. Toggling shows no toast (the switch is the feedback) and keeps focus on the switch.
+- **Shortcut** (keyboard icon): "Show / hide panel" with the current binding as keycaps (`<kbd>`: white, 2px border, 4px bottom edge; `Alt` `Shift` `F` or `⌥` `⇧` `F`), "Not set" if Chrome didn't assign it, and a "Change shortcut" button that asks `background.js` to open `chrome://extensions/shortcuts` (pages can't link to chrome:// URLs).
+- **About**: the idle mascot (1×) beside "Fox Macro Recorder", an orange version chip, "N macros saved · M sites" (refreshed whenever the tab opens), and a yellow raised "Buy me a coffee" button.
+- **Toggle switch:** a `<button role="switch" aria-checked>` (keyboard: Tab + Space): 36×20 white inset track, 12×12 square knob; off = stone knob on the left, on = green track + white knob with black outline on the right; moves with `--fox-step-fast`.
 
 ### 3.7 Edit panel (`#fox-edit-panel`)
 

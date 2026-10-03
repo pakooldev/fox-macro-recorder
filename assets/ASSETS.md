@@ -151,6 +151,7 @@ Both are already in the repo; nothing to do here.
 | Error toast | `square-alert.svg` |
 | Random delay setting | `shuffle.svg` |
 | Coffee link | `coffee.svg` |
+| Settings: shortcut card | `keyboard-glyph.svg` |
 
 ---
 

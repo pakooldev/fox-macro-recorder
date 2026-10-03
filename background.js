@@ -80,6 +80,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     flagTab(tabId, message.text);
     return;
   }
+  if (message.action === 'openShortcuts') {
+    chrome.tabs.create({ url: 'chrome://extensions/shortcuts' });
+    return;
+  }
   if (message.action !== 'getShortcut') return;
   chrome.commands.getAll().then(commands => {
     sendResponse(commands.find(c => c.name === '_execute_action')?.shortcut || '');

@@ -123,8 +123,10 @@ try {
 
   await check('settings: version, shortcut, random delay (accessible switch) persist after reload', async () => {
     await page.click('.fox-tab-btn[data-tab="settings"]');
-    assert.match(await page.textContent('.fox-about'), new RegExp(`v${manifest.version.replace(/\./g, '\\.')}`));
-    assert.match(await page.textContent('.fox-about'), /Show\/hide: \S/);
+    assert.equal(await page.textContent('.fox-version-chip'), `v${manifest.version}`);
+    assert(await page.locator('.fox-keys kbd').count() >= 2, 'shortcut keycaps');
+    assert(await page.isDisabled('#fox-delay-min'), 'min/max are disabled while random delay is off');
+    await page.waitForFunction(() => /\d+ macros? saved/.test(document.querySelector('#fox-macro-shadow-host').shadowRoot.querySelector('#fox-about-stats').textContent));
     await page.focus('#fox-random-delay-toggle');
     await page.keyboard.press('Space');
     assert.equal(await page.getAttribute('#fox-random-delay-toggle', 'aria-checked'), 'true');

@@ -278,12 +278,31 @@ function getFoxStyles() {
     /* ==========================================
        Settings tab
        ========================================== */
-    .fox-settings-body { display: flex; flex-direction: column; gap: 16px; padding: 10px 8px 12px; }
-    .fox-settings-group { display: flex; flex-direction: column; gap: 8px; }
+    .fox-settings-body { display: flex; flex-direction: column; gap: 12px; padding: 10px 8px 12px; }
     .fox-section-label { color: var(--fox-text-2); font-size: 14px; letter-spacing: 1px; text-transform: uppercase; }
-    .fox-settings-row { display: flex; align-items: center; justify-content: space-between; }
-    .fox-settings-label { display: flex; align-items: center; gap: 8px; }
-    .fox-settings-icon { color: var(--fox-link); }
+
+    /* each group is a little game window: silver title strip over a white body */
+    .fox-settings-card {
+      display: flex; flex-direction: column; gap: 8px;
+      padding: 0 10px 10px;
+      background: var(--fox-surface);
+      border: 2px solid var(--px-black);
+      box-shadow: 2px 2px 0 var(--px-black);
+    }
+    .fox-settings-card-title {
+      display: flex; align-items: center; gap: 6px;
+      margin: 0 -10px;
+      padding: 2px 8px;
+      background: var(--px-silver);
+      box-shadow: inset 0 -2px 0 var(--px-stone);
+      font: 14px var(--fox-font-pixel);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .fox-settings-card-title .fox-icon { color: var(--px-black); }
+    .fox-settings-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 28px; }
+    .fox-settings-name { font-size: 16px; }
+    .fox-settings-hint { margin: 0; color: var(--fox-text-2); font: 13px/1.4 var(--fox-font-ui); }
 
     .fox-toggle {
       position: relative;
@@ -304,19 +323,47 @@ function getFoxStyles() {
     .fox-toggle.active { background: var(--px-green); box-shadow: inset 2px 2px 0 var(--px-pine); }
     .fox-toggle.active .fox-toggle-knob { left: 18px; background: var(--px-white); box-shadow: 0 0 0 2px var(--px-black); }
 
-    .fox-range-row { display: flex; align-items: center; gap: 8px; }
+    .fox-range-row { display: flex; align-items: center; gap: 12px; }
+    .fox-range-field { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--fox-text-2); text-transform: uppercase; }
     .fox-range-input { width: 64px; }
-    .fox-range-sep, .fox-range-unit { color: var(--fox-text-2); font-size: 14px; }
+    .fox-range-unit { color: var(--fox-text-2); font-size: 14px; }
+    .fox-range-row.off :is(.fox-range-field, .fox-range-unit) { color: var(--px-silver); }
+    .fox-range-row.off input { color: var(--px-silver); border-color: var(--px-silver); box-shadow: none; }
 
-    .fox-about { display: flex; flex-direction: column; gap: 6px; }
-    .fox-version { color: var(--fox-text-2); font-size: 14px; }
-    .fox-about-link {
-      display: inline-flex; align-items: center; gap: 4px;
-      color: var(--fox-link); font-size: 14px; text-decoration: none;
-      border-bottom: 2px solid transparent;
-      align-self: flex-start;
+    /* keycaps: a thicker bottom edge makes them read as keys */
+    .fox-keys { display: flex; gap: 4px; }
+    .fox-keys kbd {
+      min-width: 26px; height: 26px; padding: 0 6px;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--px-white);
+      border: 2px solid var(--px-black);
+      border-bottom-width: 4px;
+      font: 14px var(--fox-font-ui);
     }
-    .fox-about-link:hover { border-bottom: 2px dotted var(--fox-link); }
+    .fox-shortcut-change { align-self: flex-start; }
+
+    .fox-about { flex-direction: row; align-items: center; gap: 10px; padding-top: 10px; }
+    .fox-about-text { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .fox-about-name { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 16px; }
+    .fox-version-chip {
+      padding: 0 6px;
+      background: var(--px-orange);
+      border: 2px solid var(--px-black);
+      font-size: 14px;
+    }
+    .fox-coffee-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      align-self: flex-start;
+      padding: 2px 10px 2px 6px;
+      background: var(--px-yellow);
+      color: var(--px-black);
+      border: 2px solid var(--px-black);
+      box-shadow: inset 2px 2px 0 var(--px-white), inset -2px -2px 0 var(--px-orange), 2px 2px 0 var(--px-black);
+      font: 14px var(--fox-font-pixel);
+      text-decoration: none;
+    }
+    .fox-coffee-btn:hover { outline: 2px solid var(--px-white); outline-offset: -6px; }
+    .fox-coffee-btn:active { transform: translate(2px, 2px); box-shadow: inset 2px 2px 0 var(--px-white), inset -2px -2px 0 var(--px-orange); }
 
     /* ==========================================
        Edit panel
