@@ -492,6 +492,52 @@ function getFoxStyles() {
     @keyframes fox-frames-4 { from { background-position-x: 0; } to { background-position-x: calc(var(--f) * -4); } }
     @keyframes fox-blink-frame { 0% { background-position-x: 0; } 92% { background-position-x: calc(var(--f) * -1); } 100% { background-position-x: calc(var(--f) * -1); } }
 
+    /* ==========================================
+       Motion (DESIGN.md §2.4): whole-pixel offsets in steps, <=160ms, never blocks input.
+       Entrances use @starting-style, so nothing waits on JS.
+       ========================================== */
+    @keyframes fox-shake { 0%, 100% { transform: none; } 25% { transform: translateX(-4px); } 50% { transform: translateX(4px); } 75% { transform: translateX(-2px); } }
+    @keyframes fox-bump { from { transform: translateY(-2px); } to { transform: none; } }
+    @keyframes fox-outline-blink { 50% { outline-color: transparent; } }
+    @keyframes fox-border-blink { 50% { border-color: var(--px-black); } }
+    @keyframes fox-fresh { 0%, 100% { border-color: var(--px-black); } 1%, 49% { border-color: var(--px-orange); } }
+
+    /* windows drop in 12px; closing the main panel lifts it back out */
+    #fox-panel { transition: transform 120ms steps(3), display 120ms allow-discrete; }
+    #fox-panel.hidden { transform: translateY(-12px); }
+    @starting-style { #fox-panel:not(.hidden) { transform: translateY(-12px); } }
+    @starting-style { #fox-edit-panel, #fox-inspector-panel { transform: translateY(-8px); } }
+    #fox-edit-panel, #fox-inspector-panel { transition: transform 120ms steps(3); }
+
+    /* FAB pops up from its corner; hops on hover */
+    #fox-fab { transition: transform 80ms steps(2); }
+    @starting-style { #fox-fab.visible { transform: translateY(8px); } }
+    #fox-fab.visible:hover { transform: translateY(-2px); }
+
+    /* tab content slides in from the right */
+    .fox-tab-content.active { transition: transform 80ms steps(2); }
+    @starting-style { .fox-tab-content.active { transform: translateX(8px); } }
+
+    /* status strip drops in */
+    .fox-status-strip.visible { transition: transform 80ms steps(2); }
+    @starting-style { .fox-status-strip.visible { transform: translateY(-4px); } }
+
+    /* macro cards: a new one drops in and flashes its border orange; deleting slides out */
+    .fox-macro-card.fresh { animation: fox-card-in 120ms steps(3), fox-fresh 320ms steps(2) 120ms; }
+    @keyframes fox-card-in { from { transform: translateY(-8px); } to { transform: none; } }
+    .fox-macro-card.confirm-delete { animation: fox-shake 160ms steps(4); }
+    .fox-macro-card.leaving { transform: translateX(16px); visibility: hidden; transition: transform 120ms steps(3), visibility 0s 120ms; }
+
+    /* live states: recording panel outline and playing card border blink */
+    #fox-panel.recording-mode { outline: 2px solid var(--px-red); outline-offset: 2px; animation: fox-outline-blink 1s steps(1) infinite; }
+    .fox-macro-card:has(.fox-abtn-stop) { animation: fox-border-blink 0.8s steps(1) infinite; }
+    #fox-fab:is(.recording, .playing) { animation: fox-outline-blink 1s steps(1) infinite; }
+    .fox-rec-count.bump { display: inline-block; animation: fox-bump 80ms steps(1); }
+
+    /* errors shake once; the FAB fox cheers after a playback finishes */
+    .fox-toast.error.visible { animation: fox-shake 160ms steps(4); }
+    #fox-fab.cheer .fox-mascot { background-position-y: calc(var(--f) * -3); animation: none; }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; transition: none !important; }
     }

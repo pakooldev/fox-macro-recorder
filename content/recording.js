@@ -21,7 +21,12 @@ function handleClick(event) {
   });
 
   const countEl = q('.fox-rec-count');
-  if (countEl) countEl.textContent = state.recordedActions.length;
+  if (countEl) {
+    countEl.textContent = state.recordedActions.length;
+    countEl.classList.remove('bump');
+    void countEl.offsetWidth; // restart the bump animation
+    countEl.classList.add('bump');
+  }
 
   showClickFeedback(event.clientX, event.clientY, '#FF004D');
 }

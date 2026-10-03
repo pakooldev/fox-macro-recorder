@@ -57,6 +57,13 @@ function viewport() {
   return { width: document.documentElement.clientWidth, height: document.documentElement.clientHeight };
 }
 
+// Where a fixed element is laid out, ignoring transforms: the drop-in/slide animations
+// move things for 120ms, and positioning must not copy that offset
+function layoutRect(element) {
+  const left = element.offsetLeft, top = element.offsetTop, width = element.offsetWidth, height = element.offsetHeight;
+  return { left, top, width, height, right: left + width, bottom: top + height };
+}
+
 function moveTo(element, left, top) {
   const { width, height } = viewport();
   Object.assign(element.style, {
@@ -70,7 +77,7 @@ function moveTo(element, left, top) {
 // Pull a (visible) element back on screen, e.g. after it grew or the window shrank
 function clampIntoView(element) {
   if (!element?.isConnected || !element.offsetWidth) return;
-  const r = element.getBoundingClientRect();
+  const r = layoutRect(element);
   const { width, height } = viewport();
   if (r.left < 0 || r.top < 0 || r.right > width - EDGE || r.bottom > height - EDGE) moveTo(element, r.left, r.top);
 }
@@ -78,7 +85,7 @@ function clampIntoView(element) {
 // Open a floating panel next to the main panel: left of it, else right of it, else
 // overlapping it with an offset. `cascade` shifts it when another one already sits there.
 function placeBesideMain(element, cascade = 0) {
-  const main = state.panel.getBoundingClientRect();
+  const main = layoutRect(state.panel);
   const gap = 12;
   const { width } = viewport();
   const w = element.offsetWidth;
@@ -114,7 +121,7 @@ function makeDraggable(element, handle = element) {
     dragged = false;
     const control = e.target.closest('button, input, select');
     if (control && control !== handle) return; // a draggable button (FAB) drags from anywhere on it
-    const rect = element.getBoundingClientRect();
+    const rect = layoutRect(element);
     start = { x: e.clientX, y: e.clientY };
     offsetX = e.clientX - rect.left;
     offsetY = e.clientY - rect.top;

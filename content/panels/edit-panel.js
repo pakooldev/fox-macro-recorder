@@ -111,14 +111,14 @@ function setupEditPanelResize(panel) {
       const startY = e.clientY;
       const startW = panel.offsetWidth;
       const startH = panel.offsetHeight;
-      const rect = panel.getBoundingClientRect();
+      const rect = layoutRect(panel);
 
       // Anchor the opposite horizontal side
       if (side === 'br') {
         panel.style.left = rect.left + 'px';
         panel.style.right = 'auto';
       } else {
-        panel.style.right = (window.innerWidth - rect.right) + 'px';
+        panel.style.right = (viewport().width - rect.right) + 'px';
         panel.style.left = 'auto';
       }
 

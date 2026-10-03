@@ -3,6 +3,7 @@
 
 let deleteConfirmMacroId = null;
 let deleteConfirmTimer = null;
+let renderedMacroIds = null; // to animate only cards that are new since the last render
 
 async function loadMacros() {
   const list = q('#fox-macros-list');
@@ -41,7 +42,13 @@ async function loadMacros() {
       <div class="fox-domain-group-header">${domain || 'Ungrouped'}</div>
       ${groups[domain].map(renderMacroCard)}
     `)}`;
+    if (renderedMacroIds) {
+      list.querySelectorAll('.fox-macro-card').forEach(card => {
+        if (!renderedMacroIds.has(card.dataset.id)) card.classList.add('fresh');
+      });
+    }
   }
+  renderedMacroIds = new Set(allMacros.map(m => m.id)); // all, so switching the filter doesn't flash every card
 
   renderMode();
 }
@@ -146,6 +153,11 @@ function cancelDeleteConfirm() {
 async function confirmDelete(id) {
   clearTimeout(deleteConfirmTimer);
   deleteConfirmMacroId = null;
+  const card = q(`.fox-macro-card[data-id="${id}"]`);
+  if (card) {
+    card.classList.add('leaving');
+    await new Promise(resolve => setTimeout(resolve, 120)); // let it slide out (input isn't blocked)
+  }
   await updateMacros(macros => macros.filter(m => m.id !== id));
   loadMacros();
   showToast('Macro deleted', 'success');

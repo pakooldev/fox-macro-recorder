@@ -41,7 +41,7 @@ function placeToast(toast) {
     moveTo(toast, (width - toast.offsetWidth) / 2, 12);
     return;
   }
-  const r = anchor.getBoundingClientRect();
+  const r = layoutRect(anchor);
   const isPanel = anchor === state.panel;
   if (isPanel) toast.style.width = `${r.width}px`;
   const h = toast.offsetHeight;

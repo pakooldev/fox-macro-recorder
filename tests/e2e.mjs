@@ -150,7 +150,7 @@ try {
   });
 
   // ---- UX review 2 (reviews/2026-10-03-ux-review-2.md), round 1 ----
-  const rect = (sel) => page.locator(sel).boundingBox();
+  const rect = async (sel) => { await page.waitForTimeout(160); return page.locator(sel).boundingBox(); }; // after the 120ms entrance animations
   const clientWidth = () => page.evaluate(() => document.documentElement.clientWidth);
 
   await check('H1: dragged flush right, the panel stays clear of the page scrollbar', async () => {

@@ -71,6 +71,10 @@ async function playMacro(id) {
   state.playingId = null;
   renderMode();
   showToast(stopped ? 'Playback stopped' : 'Playback complete', stopped ? 'info' : 'success');
+  if (!stopped && state.isPanelMinimized) {
+    foxFab.classList.add('cheer');
+    setTimeout(() => foxFab.classList.remove('cheer'), 1000);
+  }
 }
 
 async function playActions(actions, currentLoop, totalLoops) {

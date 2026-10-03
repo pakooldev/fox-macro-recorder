@@ -117,7 +117,24 @@ Floating panels use a `6px 6px 0` drop shadow; buttons `2px 2px 0`. Corners stay
 | Sprite loop | 2–4 frames, `steps(N)` over `N × 150ms`–`N × 300ms` |
 | REC blink | dot visible/hidden, `1s steps(2) infinite` |
 
-`@media (prefers-reduced-motion: reduce)`: no infinite animations, no panel/toast slide (just appear).
+`@media (prefers-reduced-motion: reduce)`: every animation and transition is off; live states stay visible as static styles (red outline while recording, blue border on the playing card, REC dot shown), things just appear.
+
+**Motion set** (all in the Motion block at the end of `content/styles.js`; entrances use `@starting-style`, so no JS waits on them):
+
+| What | Motion |
+|---|---|
+| Main panel open / close | drops in from -12px / lifts out, 120ms steps(3) (`display` transitions with `allow-discrete`) |
+| Edit / Inspector open | drop in from -8px, 120ms steps(3) |
+| Tab switch | content slides in from +8px, 80ms steps(2) |
+| FAB | pops up 8px when it appears, hops 2px on hover; the fox shows its `success` frame for 1s after a playback finishes while minimized |
+| Status strip | drops in 4px, 80ms steps(2); the REC counter bumps 2px on each click |
+| New macro card | drops in 8px (120ms steps(3)) then its border flashes orange (320ms); only cards that are new, not on every re-render or filter change |
+| Delete | confirm card shakes once (160ms); the deleted card slides 16px right and disappears (120ms) before the list updates |
+| Recording / playing | red outline around the compact panel and the FAB, blinking 1s steps(1); the playing card's blue border blinks 0.8s |
+| Toasts | slide 8px out from behind the panel edge, 120ms steps(3), no fade; errors shake once |
+| Buttons | press sinks 2px (existing) |
+
+Positioning code always reads layout boxes (`layoutRect`: `offsetLeft/Top`), never transformed ones, so a panel that is still animating is never placed 12px off.
 
 **Speed rule (user decision 2026-10-03):** every transition is at most 160ms, and no animation ever blocks input: the user can click the next thing immediately. No countdown/progress animations for waits that the user didn't start (e.g. the 5s delete auto-cancel has no visible countdown).
 

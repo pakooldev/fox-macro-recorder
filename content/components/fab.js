@@ -18,7 +18,7 @@ function hideFab() {
 
 // The fox shrinks into the panel's top-right corner, where the user was looking
 function minimizePanel() {
-  const r = state.panel.getBoundingClientRect();
+  const r = layoutRect(state.panel);
   state.panel.classList.add('hidden');
   state.isPanelMinimized = true;
   foxFab.classList.add('visible');
