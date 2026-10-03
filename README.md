@@ -326,7 +326,8 @@ fox-macro-recorder/
 │   ├── panels/            # main, edit, inspector, settings
 │   └── components/        # fab, toast
 ├── background.js          # Icon click toggles the panel; injects content/ (file list lives here)
-├── tests/                 # node --test tests/*.test.mjs
+├── tests/                 # npm test (unit) · npm install && npm run e2e (Playwright, real extension)
+├── package.sh             # Builds dist/fox-macro-recorder-<version>.zip for the Web Store
 ├── assets/                # Font, sprites, icon sources, store art (see assets/ASSETS.md)
 ├── DESIGN.md              # Design system
 └── icons/

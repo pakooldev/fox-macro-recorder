@@ -5,7 +5,7 @@ What [`DESIGN.md`](../DESIGN.md) needs that can't be written as CSS/code. Three 
 | Kind | Who makes it | Items |
 |---|---|---|
 | **Generate** | Another AI (prompts below) → raw PNGs (done) | App icon, mascot sprites, store promo tile |
-| **Download** | Existing free assets (done) | Pixelify Sans font, Pixelarticons icon set |
+| **Download** | Existing free assets (done) | Tiny5 font, Pixelarticons icon set |
 | **Capture** | Us, after the refactor | Store screenshots |
 
 Everything else in the design (borders, shadows, toggle, click feedback, resize grips, scrollbars, dots) is pure CSS — no asset.
@@ -118,9 +118,10 @@ Titles on G10/G11 are added afterwards with the real font (AI-rendered text is u
 
 Both are already in the repo; nothing to do here.
 
-### D1 — Font: Pixelify Sans ✅
+### D1 — Font: Tiny5 ✅ (replaced Pixelify Sans)
 
-- `assets/fonts/pixelify-sans.woff2` (11 KB): variable font (weight 400–700), subset to Latin-1 + common punctuation (`·`, `–`, `—`, curly quotes, `…`), converted from `PixelifySans[wght].ttf` in github.com/google/fonts (`ofl/pixelifysans`) with `fontTools.subset`.
+- `assets/fonts/tiny5.woff2` (8 KB): single weight, subset to Latin-1 + common punctuation (`·`, `–`, `—`, curly quotes, `…`), converted from `Tiny5-Regular.ttf` in github.com/google/fonts (`ofl/tiny5`) with `fontTools.subset`. `OFL.txt` is Tiny5's.
+- Pixelify Sans was the first choice but was dropped after the 2026-10-03 review: its C/O, 5/S and 2/Z look the same at UI sizes. Compared with Silkscreen, VT323, Jersey 10, Micro 5 and Press Start 2P; Tiny5 kept every glyph distinct at a similar width.
 - `assets/fonts/OFL.txt`: SIL Open Font License 1.1, must ship with the font.
 - Need more characters later? Re-run the subset from the original TTF with a wider `--unicodes`.
 

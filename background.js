@@ -27,8 +27,23 @@ async function togglePanel(tabId) {
     // Not injected yet on this page
     await chrome.scripting.executeScript({ target: { tabId }, files: CONTENT_FILES });
     await chrome.tabs.sendMessage(tabId, { action: 'togglePanel' });
+    await showPendingNotice(tabId);
   }
 }
+
+// A recording/playback cut off by navigation is cancelled (the page that held it is
+// gone). The tab gets a "!" badge right away and the panel explains on next open.
+const noticeKey = tabId => `notice:${tabId}`;
+
+async function showPendingNotice(tabId) {
+  const key = noticeKey(tabId);
+  const text = (await chrome.storage.session.get(key))[key];
+  if (!text) return;
+  await chrome.storage.session.remove(key);
+  await chrome.tabs.sendMessage(tabId, { action: 'notice', text });
+}
+
+chrome.tabs.onRemoved.addListener(tabId => chrome.storage.session.remove(noticeKey(tabId)));
 
 chrome.action.onClicked.addListener(async (tab) => {
   try {
@@ -36,7 +51,7 @@ chrome.action.onClicked.addListener(async (tab) => {
     await chrome.action.setBadgeText({ tabId: tab.id, text: '' });
     await chrome.action.setTitle({ tabId: tab.id, title: chrome.runtime.getManifest().name });
   } catch {
-    // chrome://, the Web Store, PDF viewer... (tab-scoped, cleared on navigation)
+    // chrome://, the Web Store, PDF viewer... (tab-scoped; cleared by the next successful toggle)
     await chrome.action.setBadgeText({ tabId: tab.id, text: '!' });
     await chrome.action.setTitle({ tabId: tab.id, title: "Fox can't run on this page" });
   }
@@ -44,6 +59,13 @@ chrome.action.onClicked.addListener(async (tab) => {
 
 // The panel shows the user's current toggle shortcut (content scripts can't read chrome.commands)
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === 'interrupted' && sender.tab) {
+    const tabId = sender.tab.id;
+    chrome.storage.session.set({ [noticeKey(tabId)]: message.text });
+    chrome.action.setBadgeText({ tabId, text: '!' });
+    chrome.action.setTitle({ tabId, title: message.text });
+    return;
+  }
   if (message.action !== 'getShortcut') return;
   chrome.commands.getAll().then(commands => {
     sendResponse(commands.find(c => c.name === '_execute_action')?.shortcut || '');

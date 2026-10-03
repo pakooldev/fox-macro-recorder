@@ -13,6 +13,7 @@ const state = {
   recordedActions: [],
   activeTab: 'home',
   isPanelMinimized: false,
+  domainFilter: null,      // null = this site's macros if it has any, else all
   shortcut: '',            // toolbar toggle shortcut, from background.js
   settings: { ...DEFAULT_SETTINGS }
 };
@@ -74,12 +75,12 @@ function renderMode() {
   foxFab?.classList.toggle('playing', isPlaying && !isRecording);
 }
 
-// Pixelify Sans, registered on the document (@font-face inside a shadow root is ignored).
+// Tiny5 pixel font, registered on the document (@font-face inside a shadow root is ignored).
 // Loaded from bytes so the page's CSP font-src can't block it; falls back to the system font.
 async function loadPixelFont() {
   if ([...document.fonts].some(f => f.family === 'FoxPixel')) return;
-  const res = await fetch(chrome.runtime.getURL('assets/fonts/pixelify-sans.woff2'));
-  const font = new FontFace('FoxPixel', await res.arrayBuffer(), { weight: '400 700' });
+  const res = await fetch(chrome.runtime.getURL('assets/fonts/tiny5.woff2'));
+  const font = new FontFace('FoxPixel', await res.arrayBuffer());
   document.fonts.add(await font.load());
 }
 
@@ -108,6 +109,21 @@ async function loadPixelFont() {
     renderSettingsTab();
   });
 
+  // Navigating away ends this page's recording/playback; background.js tells the user
+  window.addEventListener('pagehide', () => {
+    if (!state.isRecording && !state.isPlaying) return;
+    const text = state.isRecording ? 'Recording cancelled: the page changed' : 'Playback stopped: the page changed';
+    chrome.runtime.sendMessage({ action: 'interrupted', text }).catch(() => {});
+  });
+
+  watchStore({
+    onMacros: loadMacros,
+    onSettings: changed => {
+      Object.assign(state.settings, changed);
+      renderSettingsTab();
+    }
+  });
+
   chrome.runtime.sendMessage({ action: 'getShortcut' }).then(shortcut => {
     state.shortcut = shortcut;
     q('#fox-close-btn').title = shortcut ? `Close (${shortcut})` : 'Close';
@@ -120,7 +136,9 @@ async function loadPixelFont() {
 // ==========================================
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   const panel = state.panel;
-  if (message.action === 'togglePanel') {
+  if (message.action === 'notice') {
+    showToast(message.text, 'error', 5000);
+  } else if (message.action === 'togglePanel') {
     if (state.isPanelMinimized) {
       expandPanel();
     } else if (panel.classList.contains('hidden')) {

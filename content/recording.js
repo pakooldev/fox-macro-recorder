@@ -26,11 +26,20 @@ function handleClick(event) {
   showClickFeedback(event.clientX, event.clientY, '#EF4444');
 }
 
+// An unsaved recording blocks a new one: save or discard it first
+function hasUnsavedRecording() {
+  return q('.fox-save-bar').classList.contains('visible');
+}
+
 function startRecording() {
+  if (hasUnsavedRecording()) {
+    showToast('Save or discard the last recording first', 'error');
+    q('#fox-save-input').focus();
+    return;
+  }
   state.isRecording = true;
   state.recordingStartTime = Date.now();
   state.recordedActions = [];
-  q('.fox-save-bar').classList.remove('visible');
   renderMode();
   showToast('Recording started', 'info');
 }
@@ -38,7 +47,10 @@ function startRecording() {
 function stopRecording() {
   state.isRecording = false;
   renderMode();
-  if (state.recordedActions.length === 0) return;
+  if (state.recordedActions.length === 0) {
+    showToast('Nothing recorded', 'info');
+    return;
+  }
 
   q('.fox-save-bar').classList.add('visible');
   q('#fox-save-domain').value = window.location.hostname;
@@ -48,4 +60,10 @@ function stopRecording() {
   if (state.isPanelMinimized) expandPanel();
   if (state.activeTab !== 'home') switchTab('home');
   saveInput.focus();
+}
+
+function discardRecording() {
+  state.recordedActions = [];
+  q('.fox-save-bar').classList.remove('visible');
+  showToast('Recording discarded', 'info');
 }

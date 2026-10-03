@@ -57,7 +57,8 @@ function makeDraggable(element, handle = element) {
 
   handle.addEventListener('mousedown', (e) => {
     dragged = false;
-    if (e.target !== handle && e.target.closest('button, input, select')) return;
+    const control = e.target.closest('button, input, select');
+    if (control && control !== handle) return; // a draggable button (FAB) drags from anywhere on it
     const rect = element.getBoundingClientRect();
     start = { x: e.clientX, y: e.clientY };
     offsetX = e.clientX - rect.left;
@@ -68,9 +69,12 @@ function makeDraggable(element, handle = element) {
   document.addEventListener('mousemove', (e) => {
     if (!start) return;
     if (Math.abs(e.clientX - start.x) > 3 || Math.abs(e.clientY - start.y) > 3) dragged = true;
+    // Keep it fully on screen so its header can always be grabbed again
+    const maxX = Math.max(0, window.innerWidth - element.offsetWidth);
+    const maxY = Math.max(0, window.innerHeight - element.offsetHeight);
     Object.assign(element.style, {
-      left: `${e.clientX - offsetX}px`,
-      top: `${e.clientY - offsetY}px`,
+      left: `${Math.min(Math.max(0, e.clientX - offsetX), maxX)}px`,
+      top: `${Math.min(Math.max(0, e.clientY - offsetY), maxY)}px`,
       right: 'auto',
       bottom: 'auto'
     });

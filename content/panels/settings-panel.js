@@ -13,14 +13,15 @@ function renderSettingsTab() {
             <span class="fox-settings-icon">${icon('shuffle')}</span>
             <span>Random Delay</span>
           </div>
-          <div class="fox-toggle${s.randomDelayEnabled ? ' active' : ''}" id="fox-random-delay-toggle" title="Add random delays between clicks">
-            <div class="fox-toggle-knob"></div>
-          </div>
+          <button class="fox-toggle${s.randomDelayEnabled ? ' active' : ''}" id="fox-random-delay-toggle" role="switch"
+            aria-checked="${s.randomDelayEnabled}" aria-label="Random delay" title="Add random delays between clicks">
+            <span class="fox-toggle-knob"></span>
+          </button>
         </div>
         <div class="fox-range-row" title="Min and max delay range (ms)">
-          <input type="number" id="fox-delay-min" class="fox-range-input" value="${s.randomDelayMin}" min="0" max="10000">
+          <input type="number" id="fox-delay-min" class="fox-range-input" aria-label="Random delay minimum (ms)" value="${s.randomDelayMin}" min="0" max="10000">
           <span class="fox-range-sep">—</span>
-          <input type="number" id="fox-delay-max" class="fox-range-input" value="${s.randomDelayMax}" min="0" max="10000">
+          <input type="number" id="fox-delay-max" class="fox-range-input" aria-label="Random delay maximum (ms)" value="${s.randomDelayMax}" min="0" max="10000">
           <span class="fox-range-unit">ms</span>
         </div>
       </div>
@@ -46,6 +47,7 @@ function renderSettingsTab() {
   const toggle = container.querySelector('#fox-random-delay-toggle');
   toggle.addEventListener('click', async () => {
     toggle.classList.toggle('active', !s.randomDelayEnabled);
+    toggle.setAttribute('aria-checked', String(!s.randomDelayEnabled));
     await set('randomDelayEnabled', !s.randomDelayEnabled);
     showToast('Settings updated', 'success');
   });

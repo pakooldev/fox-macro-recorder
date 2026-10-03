@@ -1,6 +1,18 @@
 // Fox Macro Recorder - Playback Functionality
 
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+// Waits are cut short by stopPlayback(), so Stop works during long loop delays too
+let wakeSleeper = null;
+function sleep(ms) {
+  return new Promise(resolve => {
+    const timer = setTimeout(resolve, ms);
+    wakeSleeper = () => { clearTimeout(timer); resolve(); };
+  });
+}
+
+function stopPlayback() {
+  state.shouldStop = true;
+  wakeSleeper?.();
+}
 
 // Extra random delay (ms) when Random Delay is on
 function jitter() {
@@ -17,7 +29,7 @@ function setProgress(text) {
 // Play/stop buttons all route here
 function togglePlayback(id) {
   if (state.isPlaying) {
-    state.shouldStop = true;
+    stopPlayback();
   } else if (id) {
     playMacro(id);
   }

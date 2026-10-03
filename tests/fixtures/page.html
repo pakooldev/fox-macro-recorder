@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Fox e2e page</title></head>
+<body style="height: 100vh; margin: 0; font-family: sans-serif;">
+  <!-- Button text looks like HTML: recorded page text must never become markup -->
+  <button id="a" style="position:absolute;left:100px;top:300px;width:200px;height:40px">&lt;img src=x onerror="window.__xss=1"&gt;</button>
+  <button id="b" style="position:absolute;left:400px;top:300px;width:100px;height:40px">B</button>
+  <a id="nav" href="?page=2" style="position:absolute;left:100px;top:400px">next page</a>
+  <script>
+    window.clicks = [];
+    for (const id of ['a', 'b']) document.getElementById(id).addEventListener('click', () => window.clicks.push(id));
+  </script>
+</body>
+</html>

@@ -40,6 +40,8 @@ function getFoxStyles() {
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    /* Tiny5 has one weight: never fake a bold (smears the pixels) */
+    :host { font-synthesis: none; }
 
     button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
 
@@ -57,7 +59,7 @@ function getFoxStyles() {
       color: var(--fox-text);
       border: 2px solid var(--px-black);
       box-shadow: inset 2px 2px 0 var(--fox-bevel-hi), inset -2px -2px 0 var(--fox-bevel-lo), 6px 6px 0 var(--px-black);
-      font: 14px/1.4 var(--fox-font-pixel);
+      font: 16px/1.3 var(--fox-font-pixel);
       z-index: 2147483647;
     }
 
@@ -87,12 +89,12 @@ function getFoxStyles() {
       background: var(--fox-logo) no-repeat;
       image-rendering: pixelated;
     }
-    .fox-title { font-size: 16px; font-weight: 700; letter-spacing: 1px; }
+    .fox-title { font-size: 20px; letter-spacing: 1px; }
 
     .fox-edit-panel-title, .fox-inspector-panel-title {
       display: flex; align-items: center; gap: 6px;
       flex: 1; min-width: 0;
-      font-size: 14px; font-weight: 700; text-transform: uppercase;
+      font-size: 16px; text-transform: uppercase;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
@@ -123,9 +125,8 @@ function getFoxStyles() {
       color: var(--px-black);
       border: 2px solid var(--px-black);
       box-shadow: inset 2px 2px 0 var(--hi), inset -2px -2px 0 var(--lo), 2px 2px 0 var(--px-black);
-      font: 700 12px var(--fox-font-pixel);
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      font: 14px var(--fox-font-pixel);
+      letter-spacing: 0.5px;
     }
     .fox-ctrl-btn { width: 40px; height: 40px; }
     .fox-action-btn { width: 32px; height: 32px; }
@@ -176,7 +177,8 @@ function getFoxStyles() {
       outline: none;
     }
     input::placeholder { color: var(--fox-placeholder); }
-    input[type="number"] { font: 12px var(--fox-font-pixel); text-align: right; -moz-appearance: textfield; }
+    /* numbers in the system font: tabular figures line up in columns */
+    input[type="number"] { font: 13px var(--fox-font-ui); font-variant-numeric: tabular-nums; text-align: right; -moz-appearance: textfield; }
     input[type="number"]::-webkit-inner-spin-button,
     input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
@@ -201,8 +203,8 @@ function getFoxStyles() {
       background: var(--fox-surface);
       border: 2px solid var(--px-black);
       box-shadow: inset 2px 2px 0 var(--fox-bevel-lo);
-      font-size: 12px;
-      font-weight: 700;
+      font-size: 14px;
+      
       letter-spacing: 1px;
     }
     .fox-status-strip.visible { display: flex; }
@@ -223,7 +225,7 @@ function getFoxStyles() {
       display: flex; align-items: center; gap: 8px;
       margin: 4px 0 8px;
       color: var(--fox-text-2);
-      font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      font-size: 14px; letter-spacing: 1px; text-transform: uppercase;
     }
     .fox-domain-group-header::after { content: ''; flex: 1; height: 2px; background: var(--fox-line); }
 
@@ -244,7 +246,7 @@ function getFoxStyles() {
       font: 14px var(--fox-font-ui);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .fox-macro-info { flex: none; color: var(--fox-text-2); font-size: 13px; }
+    .fox-macro-info { flex: none; color: var(--fox-text-2); font-size: 14px; }
 
     .fox-macro-row2 { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .fox-macro-actions { display: flex; gap: 6px; }
@@ -257,11 +259,11 @@ function getFoxStyles() {
     .fox-empty {
       display: flex; flex-direction: column; align-items: center; gap: 6px;
       padding: 16px 8px 8px;
-      font-size: 12px; font-weight: 700; letter-spacing: 1px;
+      font-size: 14px; letter-spacing: 1px;
     }
     .fox-empty-hint {
       display: flex; align-items: center; gap: 2px;
-      color: var(--fox-text-2); font-weight: 400; letter-spacing: 0;
+      color: var(--fox-text-2); letter-spacing: 0;
     }
     .fox-empty-hint .fox-icon { color: var(--px-red); }
 
@@ -270,13 +272,14 @@ function getFoxStyles() {
        ========================================== */
     .fox-settings-body { display: flex; flex-direction: column; gap: 16px; padding: 10px 8px 12px; }
     .fox-settings-group { display: flex; flex-direction: column; gap: 8px; }
-    .fox-section-label { color: var(--fox-text-2); font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+    .fox-section-label { color: var(--fox-text-2); font-size: 14px; letter-spacing: 1px; text-transform: uppercase; }
     .fox-settings-row { display: flex; align-items: center; justify-content: space-between; }
     .fox-settings-label { display: flex; align-items: center; gap: 8px; }
     .fox-settings-icon { color: var(--fox-link); }
 
     .fox-toggle {
       position: relative;
+      display: block;
       width: 36px; height: 20px;
       flex: none;
       background: var(--fox-surface);
@@ -295,13 +298,13 @@ function getFoxStyles() {
 
     .fox-range-row { display: flex; align-items: center; gap: 8px; }
     .fox-range-input { width: 64px; }
-    .fox-range-sep, .fox-range-unit { color: var(--fox-text-2); font-size: 12px; }
+    .fox-range-sep, .fox-range-unit { color: var(--fox-text-2); font-size: 14px; }
 
     .fox-about { display: flex; flex-direction: column; gap: 6px; }
-    .fox-version { color: var(--fox-text-2); font-size: 12px; }
+    .fox-version { color: var(--fox-text-2); font-size: 14px; }
     .fox-about-link {
       display: inline-flex; align-items: center; gap: 4px;
-      color: var(--fox-link); font-size: 12px; text-decoration: none;
+      color: var(--fox-link); font-size: 14px; text-decoration: none;
       border-bottom: 2px solid transparent;
       align-self: flex-start;
     }
@@ -324,10 +327,10 @@ function getFoxStyles() {
       width: 24px; height: 24px; flex: none;
       display: flex; align-items: center; justify-content: center;
       background: var(--px-orange); color: var(--px-black);
-      font-size: 12px; font-weight: 700;
+      font-size: 14px;
     }
     .fox-action-text { flex: 1; min-width: 0; font: 13px var(--fox-font-ui); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .fox-action-coords, .fox-delay-chip { display: flex; align-items: center; gap: 2px; color: var(--fox-text-2); font-size: 12px; }
+    .fox-action-coords, .fox-delay-chip { display: flex; align-items: center; gap: 2px; color: var(--fox-text-2); font-size: 14px; }
     .fox-coord-input, .fox-delay-input { width: 48px; height: 28px; padding: 0 4px; }
 
     .fox-resize-grip { position: absolute; bottom: 4px; width: 12px; height: 12px; }
@@ -351,19 +354,21 @@ function getFoxStyles() {
       border: 2px solid var(--px-black);
       box-shadow: inset 2px 2px 0 var(--fox-bevel-lo);
     }
-    .fox-insp-coords { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 700; }
+    .fox-insp-coords { display: flex; align-items: center; gap: 8px; font-size: 20px; }
     .fox-insp-icon { color: var(--fox-link); }
     .fox-insp-element { font: 12px var(--fox-font-mono); }
     .fox-insp-tag { color: var(--fox-link); }
     .fox-insp-id { color: var(--fox-text-2); }
-    .fox-insp-empty { color: var(--fox-text-2); font-size: 12px; }
+    .fox-insp-empty { color: var(--fox-text-2); font-size: 14px; }
+    .fox-insp-note { display: flex; gap: 6px; align-items: flex-start; color: var(--fox-text-2); font: 12px/1.4 var(--fox-font-ui); }
+    .fox-insp-note .fox-icon { color: var(--fox-link); }
     .fox-snap-header { display: flex; align-items: center; justify-content: space-between; min-height: 24px; }
     .fox-snap-list { display: flex; flex-direction: column; gap: 4px; max-height: 200px; overflow-y: auto; }
-    .fox-snap-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+    .fox-snap-item { display: flex; align-items: center; gap: 8px; font-size: 14px; }
     .fox-snap-num {
       width: 20px; height: 20px; flex: none;
       display: flex; align-items: center; justify-content: center;
-      background: var(--px-orange); color: var(--px-black); font-weight: 700;
+      background: var(--px-orange); color: var(--px-black);
     }
     .fox-snap-coords { flex: 1; }
     .fox-snap-time { color: var(--fox-text-2); }
@@ -421,7 +426,7 @@ function getFoxStyles() {
       color: var(--fox-text);
       border: 2px solid var(--type);
       box-shadow: 4px 4px 0 var(--px-black);
-      font: 700 12px var(--fox-font-pixel);
+      font: 14px var(--fox-font-pixel);
       letter-spacing: 1px;
       white-space: nowrap;
       cursor: pointer;

@@ -65,7 +65,7 @@ Accent fills (record red, play blue, save green, brand orange) are used directly
 
 **Sprite colors.** The mascot/logo sprites use the PICO-8 accents (black, plum, cream, red, yellow, green, blue, pink) plus 12 fur shades extracted from the generated art (oranges, peaches, rust, browns, e.g. `#FD8D02`, `#FCC39A`, `#BB4624`, `#5C3E32`). PICO-8's own orange `#FFA300` turned the fox yellow, so sprites keep the deeper orange. These are sprite-only; UI elements never use them. The exact list is printed by `python3 assets/clean.py`.
 
-Contrast rules: text is black or stone on cream/white. Text and icons *on* a colored fill (orange, red, green, blue, yellow) are `--px-black`. Never use orange, red, green, yellow or blue as text on the light background (all below 4.5:1): links use brown, "REC" is black next to a red dot, toast icons sit on a colored square. Check any new pairing reaches 4.5:1. Minimum pixel-font size is 12px.
+Contrast rules: text is black or stone on cream/white. Text and icons *on* a colored fill (orange, red, green, blue, yellow) are `--px-black`. Never use orange, red, green, yellow or blue as text on the light background (all below 4.5:1): links use brown, "REC" is black next to a red dot, toast icons sit on a colored square. Check any new pairing reaches 4.5:1. Minimum pixel-font size is 14px.
 
 ### 2.2 Typography
 
@@ -75,9 +75,9 @@ Contrast rules: text is black or stone on cream/white. Text and icons *on* a col
 | `--fox-font-ui` | `-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans Thai', sans-serif` | Macro names, domains, recorded element text, input values |
 | `--fox-font-mono` | `ui-monospace, 'SF Mono', Consolas, monospace` | Element tag/id in the inspector, selectors |
 
-`FoxPixel` is **Pixelify Sans** (OFL), bundled in `assets/fonts/` — never loaded from Google Fonts at runtime (page CSPs block it and it would leak page visits). It is registered under the private family name `FoxPixel` so it can't collide with a page's fonts.
+`FoxPixel` is **Tiny5** (OFL), bundled in `assets/fonts/tiny5.woff2`. (Pixelify Sans was used first, but its C/O, 5/S and 2/Z are indistinguishable at UI sizes; the 2026-10-03 review read "500" as "S00".) It is never loaded from Google Fonts at runtime (page CSPs block it and it would leak page visits). It is registered under the private family name `FoxPixel` so it can't collide with a page's fonts.
 
-Scale (px): `10` micro (section labels, uppercase, +1px letter-spacing) · `12` small (card meta, counters) · `14` body · `16` title. Pixel-font text is uppercase for labels and title-case for buttons.
+Scale (px): `14` small (section labels uppercase with +1px letter-spacing, buttons, card meta, counters, toasts) · `16` body · `20` title and inspector coordinates. Tiny5 has a single weight: `font-synthesis: none`, never a faux bold. Pixel-font text is uppercase for section labels and title case for buttons. Number inputs use the system font with tabular figures.
 
 ### 2.3 Spacing, sizing, borders, shadows
 
@@ -155,25 +155,25 @@ Inset bar under the control bar, only visible while recording/playing.
 
 ### 3.4 Save bar
 
-Appears after a recording stops. Two inset inputs (name, domain) and a green "SAVE" button (black text, pine bevel). Enter saves.
+Appears after a recording stops. Two inset inputs (name, domain), a silver "Discard" and a green "Save" button (black text, pine bevel). Enter saves. While it is open, Record refuses to start (toast: save or discard first), so a recording is never lost silently; stopping with no clicks shows "Nothing recorded".
 
 ### 3.5 Domain filter + macro list
 
-- Filter: inset select, full width, label `ALL DOMAINS`.
-- Group header: pixel 12px uppercase stone text with a 2px stone rule to the right (`── EXAMPLE.COM ──────`).
+- Filter: inset select, full width. Defaults to the current site (`(this site)` in its option) when it has macros, otherwise `All domains`; choosing `All domains` lists every macro so one can be played on any site. The play dropdown follows the filter.
+- Group header: pixel 14px uppercase stone text with a 2px stone rule to the right (`── EXAMPLE.COM ──────`).
 - **Macro card:** white fill, black border, 2px drop shadow.
   - Row 1: name (UI font, 14px, black, ellipsis) + meta `5 · 3.2s` (pixel 13px, stone).
   - Row 2: actions Play (blue) / Edit (silver) / Delete (silver, red on hover) as 32px icon buttons; loop count and loop delay as small inset number inputs, each with a 24px icon (repeat, clock) instead of today's emoji.
   - Playing card: border turns blue and its Play button shows Stop.
   - **Delete confirm:** peach fill with a red border, black text, text `DELETE "name"?`, buttons CANCEL (silver) / DELETE (red). Auto-cancels after 5s (current behavior).
-- **Empty state:** sleeping mascot (2×, `.fox-mascot-2x`) centered, `NO MACROS YET` in pixel 12px, hint `Press ● to record` in silver.
+- **Empty state:** sleeping mascot (2×, `.fox-mascot-2x`) centered, `NO MACROS YET` in pixel 14px, hint `Press ● to record` in stone (`--fox-text-2`).
 
 ### 3.6 Settings tab
 
-- Section label (pixel 12px uppercase stone).
-- **Toggle:** 36×20 white inset track, 12×12 square knob; off = stone knob on the left, on = green track + white knob with black outline on the right; moves with `--fox-step-fast`.
+- Section label (pixel 14px uppercase stone).
+- **Toggle:** a `<button role="switch" aria-checked>` (keyboard: Tab + Space): 36×20 white inset track, 12×12 square knob; off = stone knob on the left, on = green track + white knob with black outline on the right; moves with `--fox-step-fast`.
 - Range row: two 64px inset number inputs + `ms`.
-- About: version from the manifest and the current show/hide shortcut (from `chrome.commands`, via `background.js`) in pixel 12px; "Buy me a coffee" as a brown text link with a dotted 2px underline on hover.
+- About: version from the manifest and the current show/hide shortcut (from `chrome.commands`, via `background.js`) in pixel 14px; "Buy me a coffee" as a brown text link with a dotted 2px underline on hover.
 
 ### 3.7 Edit panel (`#fox-edit-panel`)
 
@@ -185,7 +185,7 @@ Step number in a 24px orange square (black pixel digits). Resize grips: 12×12 s
 
 ### 3.8 Inspector panel (`#fox-inspector-panel`)
 
-Silver title bar like the edit panel, crosshair icon. Live readout in an inset box: coordinates in pixel 16px (`412, 230`), element as `<button>#save` in the mono font. Snapshot list rows: index square, coordinates, time; CLEAR button.
+Silver title bar like the edit panel, crosshair icon. Below the readout, a note says page clicks are captured as snapshots and don't reach the page while it is open. Live readout in an inset box: coordinates in pixel 16px (`412, 230`), element as `<button>#save` in the mono font. Snapshot list rows: index square, coordinates, time; CLEAR button.
 
 ### 3.9 FAB (`#fox-fab`)
 
@@ -195,7 +195,7 @@ Draggable as today.
 
 ### 3.10 Toast
 
-Bottom-center, cream fill, black text, border color by type (green success / blue info / red error), 24px black icon on a square of the type color + pixel 12px message. Slides up 8px in `--fox-step`. (The mascot `success` frame is in the sheet but not used in toasts: at 58px it made the toast too tall.)
+Bottom-center, cream fill, black text, border color by type (green success / blue info / red error), 24px black icon on a square of the type color + pixel 14px message. Slides up 8px in `--fox-step`. (The mascot `success` frame is in the sheet but not used in toasts: at 58px it made the toast too tall.)
 
 ### 3.11 Click feedback (drawn on the page, outside the shadow root)
 
@@ -224,7 +224,7 @@ Brand/mascot art (toolbar icon, mascot sprites, store promo art) is custom pixel
 ## 5. Implementation notes
 
 - **Where things live:** tokens + all component CSS in `content/styles.js` (`:host`); inline SVG icon strings in `content/icons.js` (`icon('play')` returns `html`-safe markup; generated from `assets/icons-src/`); sprite and font files in `assets/`. Mascot sizes use `--f` (one frame on screen: 58px, or 116px with `.fox-mascot-2x`), so the same state classes and keyframes work at both scales.
-- **Fonts inside Shadow DOM:** `@font-face` inside a shadow root is ignored by Chrome. Register the font on the document from the content script: `fetch(chrome.runtime.getURL('assets/fonts/pixelify-sans.woff2'))` → `new FontFace('FoxPixel', buffer)` → `document.fonts.add(...)`. Loading from bytes also avoids the page's CSP `font-src`.
+- **Fonts inside Shadow DOM:** `@font-face` inside a shadow root is ignored by Chrome. Register the font on the document from the content script: `fetch(chrome.runtime.getURL('assets/fonts/tiny5.woff2'))` → `new FontFace('FoxPixel', buffer)` → `document.fonts.add(...)`. Loading from bytes also avoids the page's CSP `font-src`.
 - **Sprites on pages with strict CSP:** sprites are CSS backgrounds with `chrome-extension://` URLs inside the shadow root. Verified on github.com (2026-10-03): font and sprites load. If a site ever blocks them, decode the PNG with `fetch` + `createImageBitmap` and draw it to a `<canvas>` (canvas isn't subject to `img-src`).
 - **`web_accessible_resources`:** `assets/fonts/*`, `assets/sprites/*`, with `"use_dynamic_url": true` so sites can't probe for the extension by a fixed URL. This adds no install warning.
 - **Mascot sheet** `assets/sprites/mascot.png` (232×348): 58×58 frames, 4 columns, one row per state in this order, frames left to right, transparent, shared baseline:

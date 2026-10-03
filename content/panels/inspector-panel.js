@@ -133,6 +133,7 @@ function updateInspectorContent(currentData) {
   container.innerHTML = html`
     <div class="fox-inspector-body">
       ${currentHTML}
+      <div class="fox-insp-note">${icon('info')}<span>While the Inspector is open, clicks on the page are captured as snapshots and don't reach the page.</span></div>
       <div class="fox-snap-header">
         <span class="fox-section-label">SNAPSHOTS</span>
         ${inspectorSnapshots.length > 0 ? html`<button class="fox-snap-clear" id="fox-snap-clear">Clear</button>` : ''}

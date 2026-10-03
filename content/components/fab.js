@@ -6,7 +6,7 @@ function createFab() {
   foxFab = document.createElement('button');
   foxFab.id = 'fox-fab';
   foxFab.innerHTML = '<span class="fox-mascot fox-m-idle"></span>';
-  foxFab.title = 'Open Fox Macro';
+  foxFab.title = 'Open Fox Macro Recorder';
   foxFab.addEventListener('click', expandPanel);
   makeDraggable(foxFab);
   state.root.appendChild(foxFab);

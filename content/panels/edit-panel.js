@@ -22,22 +22,22 @@ async function openEditPanel(id) {
       </div>
     </div>
     <div class="fox-edit-body">
-      <input type="text" class="fox-edit-name" id="fox-edit-name" value="${macro.name}" placeholder="Macro name">
-      <input type="text" class="fox-edit-domain" id="fox-edit-domain" value="${macro.domain || ''}" placeholder="Domain (e.g. example.com)">
+      <input type="text" class="fox-edit-name" id="fox-edit-name" value="${macro.name}" placeholder="Macro name" aria-label="Macro name">
+      <input type="text" class="fox-edit-domain" id="fox-edit-domain" value="${macro.domain || ''}" placeholder="Domain (e.g. example.com)" aria-label="Domain">
       <div class="fox-section-label">ACTIONS (${macro.actions.length})</div>
       <div class="fox-actions-list">${macro.actions.map((action, index) => html`
         <div class="fox-action-item">
           <div class="fox-action-num">${index + 1}</div>
           <div class="fox-action-text" title="${action.text || 'Click'}">${action.text ? action.text.slice(0, 20) : 'Click'}</div>
           <div class="fox-action-coords">
-            <input type="number" class="fox-coord-input fox-x-input" data-index="${index}" value="${Math.round(action.x)}" min="0" title="X">
+            <input type="number" class="fox-coord-input fox-x-input" data-index="${index}" value="${Math.round(action.x)}" min="0" title="X" aria-label="Step ${index + 1} X">
             <span>,</span>
-            <input type="number" class="fox-coord-input fox-y-input" data-index="${index}" value="${Math.round(action.y)}" min="0" title="Y">
+            <input type="number" class="fox-coord-input fox-y-input" data-index="${index}" value="${Math.round(action.y)}" min="0" title="Y" aria-label="Step ${index + 1} Y">
           </div>
           ${index > 0 ? html`
             <div class="fox-delay-chip">
               <span>+</span>
-              <input type="number" class="fox-delay-input" data-index="${index}" value="${action.timestamp - macro.actions[index - 1].timestamp}" min="0" title="Delay (ms)">
+              <input type="number" class="fox-delay-input" data-index="${index}" value="${action.timestamp - macro.actions[index - 1].timestamp}" min="0" title="Delay (ms)" aria-label="Step ${index + 1} delay (ms)">
             </div>
           ` : ''}
         </div>

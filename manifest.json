@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Fox Auto Clicker",
+  "name": "Fox Macro Recorder",
   "version": "2.0.1",
   "description": "Create and run browser macros to automate repetitive web tasks.",
   "permissions": [
@@ -26,7 +26,7 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "assets/fonts/pixelify-sans.woff2",
+        "assets/fonts/tiny5.woff2",
         "assets/sprites/mascot.png",
         "assets/sprites/logo.png"
       ],

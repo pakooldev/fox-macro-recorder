@@ -27,7 +27,7 @@ function createPanel() {
         <button class="fox-ctrl-btn fox-btn-record" id="fox-record-btn" title="Record">${icon('record')}</button>
         <button class="fox-ctrl-btn fox-btn-stop" id="fox-stop-btn" title="Stop" disabled>${icon('stop')}</button>
         <div class="fox-select">
-          <select class="fox-macro-select" id="fox-macro-select" title="Select macro">
+          <select class="fox-macro-select" id="fox-macro-select" title="Select macro" aria-label="Macro to play">
             <option value="">No macros</option>
           </select>
           ${icon('chevron')}
@@ -36,15 +36,16 @@ function createPanel() {
       </div>
       <div class="fox-status-strip"></div>
       <div class="fox-save-bar">
-        <input type="text" class="fox-save-input" id="fox-save-input" placeholder="Macro name...">
+        <input type="text" class="fox-save-input" id="fox-save-input" placeholder="Macro name..." aria-label="Macro name">
         <div class="fox-save-domain-row">
-          <input type="text" class="fox-save-domain" id="fox-save-domain" placeholder="Domain...">
+          <input type="text" class="fox-save-domain" id="fox-save-domain" placeholder="Domain..." aria-label="Domain">
+          <button class="fox-btn-cancel-delete" id="fox-discard-btn" title="Discard this recording">Discard</button>
           <button class="fox-save-btn" id="fox-save-btn" title="Save">Save</button>
         </div>
       </div>
       <div class="fox-domain-filter-bar">
         <div class="fox-select">
-          <select class="fox-domain-filter" id="fox-domain-filter" title="Filter by domain">
+          <select class="fox-domain-filter" id="fox-domain-filter" title="Filter by domain" aria-label="Filter by domain">
             <option value="__all__">All domains</option>
           </select>
           ${icon('chevron')}
@@ -81,16 +82,20 @@ function bindPanelEvents() {
   q('#fox-record-btn').addEventListener('click', startRecording);
   q('#fox-stop-btn').addEventListener('click', () => {
     if (state.isRecording) stopRecording();
-    if (state.isPlaying) state.shouldStop = true;
+    if (state.isPlaying) stopPlayback();
   });
   q('#fox-play-btn').addEventListener('click', () => togglePlayback(macroSelect.value));
 
   q('#fox-save-btn').addEventListener('click', saveMacro);
+  q('#fox-discard-btn').addEventListener('click', discardRecording);
   q('#fox-save-input').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') saveMacro();
   });
 
-  q('#fox-domain-filter').addEventListener('change', loadMacros);
+  q('#fox-domain-filter').addEventListener('change', (e) => {
+    state.domainFilter = e.target.value;
+    loadMacros();
+  });
   bindMacroListEvents();
 
   minimalBtn.addEventListener('click', () => {

@@ -11,10 +11,12 @@ async function loadMacros() {
   // Domain filter dropdown
   const domainFilter = q('#fox-domain-filter');
   const allDomains = [...new Set(allMacros.map(m => m.domain || ''))].sort(compareDomains);
-  const selectedDomain = allDomains.includes(domainFilter.value) ? domainFilter.value : '__all__';
+  // Default to this site's macros; "All domains" shows everything so a macro can run on any site
+  const wanted = state.domainFilter ?? window.location.hostname;
+  const selectedDomain = allDomains.includes(wanted) ? wanted : '__all__';
   domainFilter.innerHTML = html`
     <option value="__all__">All domains</option>
-    ${allDomains.map(d => html`<option value="${d}" ${d === selectedDomain ? 'selected' : ''}>${d || 'Ungrouped'}</option>`)}
+    ${allDomains.map(d => html`<option value="${d}" ${d === selectedDomain ? 'selected' : ''}>${d || 'Ungrouped'}${d && d === window.location.hostname ? ' (this site)' : ''}</option>`)}
   `;
 
   const macros = selectedDomain === '__all__'
@@ -75,11 +77,11 @@ function renderMacroCard(m) {
         <div class="fox-loop-controls">
           <div class="fox-loop-item" title="Loop count">
             ${icon('repeat')}
-            <input type="number" class="fox-loop-input" data-field="loopCount" value="${m.loopCount || 1}" min="1" max="999">
+            <input type="number" class="fox-loop-input" data-field="loopCount" aria-label="Loop count" value="${m.loopCount || 1}" min="1" max="999">
           </div>
           <div class="fox-loop-item" title="Delay between loops (ms)">
             ${icon('clock')}
-            <input type="number" class="fox-loop-input" data-field="loopDelay" value="${m.loopDelay || 0}" min="0">
+            <input type="number" class="fox-loop-input" data-field="loopDelay" aria-label="Delay between loops (ms)" value="${m.loopDelay || 0}" min="0">
           </div>
         </div>
       </div>
