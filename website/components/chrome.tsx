@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { APP_NAME, REPO_URL, STORE_URL, VERSION } from "./site";
+import { APP_NAME, STORE_URL, VERSION } from "./site";
 import { StoreButton } from "./store-button";
 
 // `wide` = the long label, swapped for `label` on phones so the header stays one row
@@ -46,9 +46,6 @@ export function Footer() {
         </p>
         <nav className="footer-links" aria-label="Footer">
           <Link href="/privacy/">Privacy</Link>
-          <a href={REPO_URL} target="_blank" rel="noopener">
-            Source
-          </a>
         </nav>
       </div>
     </footer>

@@ -101,7 +101,7 @@ Your data is permanently deleted and cannot be recovered.
 ## Contact
 
 For privacy concerns or questions about this policy:
-- Open an issue at https://github.com/panat54083/chrome-macro-recorder/issues
+- Use the Support tab on the extension's Chrome Web Store page
 
 ## Compliance
 
