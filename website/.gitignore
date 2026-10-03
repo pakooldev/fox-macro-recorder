@@ -1,0 +1,9 @@
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+# written by scripts/sync-design.mjs from the extension (the source of truth)
+generated/
+public/assets/
+public/icons/

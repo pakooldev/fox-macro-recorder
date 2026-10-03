@@ -1,0 +1,207 @@
+/* Fox Macro website. Tokens, mascot sprite rules and keyframes come from the
+   extension (generated/fox-shared.css, see scripts/sync-design.mjs); this file only
+   lays out pages with them, following DESIGN.md (§6 Website). */
+
+@font-face {
+  font-family: "FoxPixel";
+  src: url("/assets/fonts/tiny5.woff2") format("woff2");
+  font-display: swap;
+}
+
+:root {
+  /* The marquee art's night sky (not PICO-8 navy: sampled from the image so the
+     hero band continues it seamlessly on wide screens) */
+  --web-night: #122965;
+  --web-max: 1120px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { font-synthesis: none; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--fox-bg);
+  color: var(--fox-text);
+  font: 17px/1.6 var(--fox-font-ui);
+}
+img { max-width: 100%; display: block; }
+a { color: var(--fox-link); text-underline-offset: 3px; }
+a:hover { color: var(--px-black); }
+:focus-visible { outline: 2px solid var(--px-orange); outline-offset: 2px; }
+code { font: 0.9em var(--fox-font-mono); background: var(--fox-surface); border: 2px solid var(--px-silver); padding: 0 4px; }
+
+h1, h2, h3, .pixel {
+  font-family: var(--fox-font-pixel);
+  font-weight: normal;
+  line-height: 1.15;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+h1 { font-size: clamp(32px, 6vw, 48px); }
+h2 { font-size: clamp(24px, 4vw, 32px); }
+h3 { font-size: 20px; }
+.label {
+  font: 14px/1 var(--fox-font-pixel);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--fox-text-2);
+}
+
+.container { width: 100%; max-width: var(--web-max); margin: 0 auto; padding: 0 16px; }
+.section { padding: 72px 0; }
+.section-head { display: grid; gap: 8px; margin-bottom: 32px; max-width: 640px; }
+.section-head p { margin: 0; color: var(--fox-text-2); }
+.px-icon { display: block; flex: none; shape-rendering: crispEdges; }
+p .px-icon { display: inline-block; vertical-align: -2px; }
+
+/* ---------- Box recipes (DESIGN.md §2.3) ---------- */
+.raised {
+  background: var(--fox-surface);
+  border: 2px solid var(--px-black);
+  box-shadow: inset 2px 2px 0 var(--fox-bevel-hi), inset -2px -2px 0 var(--fox-bevel-lo), 4px 4px 0 var(--px-black);
+}
+.inset {
+  background: var(--fox-surface);
+  border: 2px solid var(--px-black);
+  box-shadow: inset 2px 2px 0 var(--fox-bevel-lo);
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  --fill: var(--px-silver); --hi: var(--px-white); --lo: var(--px-stone);
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 48px; padding: 0 20px;
+  font: 16px/1 var(--fox-font-pixel);
+  color: var(--px-black); text-decoration: none; white-space: nowrap;
+  background: var(--fill);
+  border: 2px solid var(--px-black);
+  box-shadow: inset 2px 2px 0 var(--hi), inset -2px -2px 0 var(--lo), 4px 4px 0 var(--px-black);
+  cursor: pointer;
+  transition: transform var(--fox-step-fast), box-shadow var(--fox-step-fast);
+}
+.btn:hover { color: var(--px-black); outline: 2px solid var(--px-black); outline-offset: -6px; }
+.btn:active { transform: translate(2px, 2px); box-shadow: inset 2px 2px 0 var(--lo), 2px 2px 0 var(--px-black); }
+.btn-primary { --fill: var(--px-orange); --hi: var(--px-peach); --lo: var(--px-brown); }
+.btn-blue { --fill: var(--px-blue); --hi: var(--px-white); --lo: var(--px-navy); }
+.btn-red { --fill: var(--px-red); --hi: var(--px-pink); --lo: var(--px-plum); }
+.btn-small { min-height: 36px; padding: 0 12px; font-size: 14px; box-shadow: inset 2px 2px 0 var(--hi), inset -2px -2px 0 var(--lo), 2px 2px 0 var(--px-black); }
+.btn.is-disabled { --fill: var(--fox-bg); --hi: var(--fox-bg); --lo: var(--fox-bg); color: var(--fox-text-2); border-style: dashed; box-shadow: none; cursor: default; outline: none; transform: none; }
+
+.keys { display: inline-flex; gap: 4px; vertical-align: middle; }
+kbd {
+  display: inline-block; min-width: 28px; padding: 2px 6px;
+  font: 14px/1.4 var(--fox-font-pixel); text-align: center; color: var(--px-black);
+  background: var(--px-white);
+  border: 2px solid var(--px-black);
+  box-shadow: inset -2px -2px 0 var(--px-silver), 2px 2px 0 var(--px-black);
+}
+
+/* ---------- Navbar / footer ---------- */
+.navbar { border-bottom: 2px solid var(--px-black); background: var(--fox-bg); position: relative; z-index: 2; }
+.nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 8px 24px; flex-wrap: wrap; padding-top: 12px; padding-bottom: 12px; }
+.brand { display: flex; align-items: center; gap: 10px; font: 20px/1 var(--fox-font-pixel); color: var(--px-black); text-decoration: none; }
+.brand-logo { width: 32px; height: 32px; background: var(--fox-logo) center / 32px 32px no-repeat; image-rendering: pixelated; }
+.nav-links { display: flex; align-items: center; gap: 4px 20px; flex-wrap: wrap; font: 16px/1 var(--fox-font-pixel); }
+.nav-links a:not(.btn) { color: var(--px-black); text-decoration: none; padding: 6px 0; border-bottom: 2px solid transparent; }
+.nav-links a:not(.btn):hover { border-bottom-color: var(--px-orange); }
+
+.footer { border-top: 2px solid var(--px-black); padding: 24px 0; color: var(--fox-text-2); font-size: 15px; }
+.footer-inner { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; align-items: center; }
+.footer-inner p { margin: 0; }
+.footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
+
+/* ---------- Hero (landing) ---------- */
+.hero { background: var(--web-night); border-bottom: 2px solid var(--px-black); color: var(--px-cream); overflow: hidden; }
+.hero-inner { position: relative; max-width: 1400px; margin: 0 auto; }
+.hero-art { width: 100%; height: auto; image-rendering: pixelated; }
+.hero-copy {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 46%;
+  display: flex; flex-direction: column; justify-content: center; gap: 20px;
+  padding: 24px 16px 24px max(16px, calc((100vw - var(--web-max)) / 2 + 16px));
+}
+.hero-copy p { margin: 0; font-size: 18px; max-width: 34ch; color: var(--px-cream); }
+.hero-copy .label { color: var(--px-peach); }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.hero .btn.is-disabled { color: var(--px-cream); border-color: var(--px-cream); background: transparent; }
+.hero-note { font-size: 15px !important; color: var(--px-silver) !important; }
+.hero-note .keys { margin: 0 2px; }
+/* Under ~900px the empty sky is too small for the text: stack text over the art,
+   cropped to its right half where the fox is */
+@media (max-width: 900px) {
+  .hero-copy { position: static; width: auto; padding: 40px 16px 8px; }
+  .hero-art { width: 200%; max-width: none; margin-left: -100%; }
+}
+
+/* ---------- Cards and grids ---------- */
+.grid-2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)) !important; align-items: start; }
+.grid { display: grid; gap: 24px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+.card { padding: 20px; display: grid; gap: 8px; align-content: start; }
+.card h3 { display: flex; align-items: center; gap: 10px; }
+.card p { margin: 0; color: var(--fox-text-2); }
+.chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; flex: none; color: var(--px-black);
+  border: 2px solid var(--px-black);
+  background: var(--chip, var(--px-orange));
+}
+
+/* How it works: 3 steps with the mascot in each state */
+.steps { counter-reset: step; }
+.step { justify-items: start; gap: 12px; }
+.step .label::before { counter-increment: step; content: "Step " counter(step) " · "; }
+.step-fox { width: 116px; height: 116px; display: flex; align-items: end; }
+
+.callout {
+  display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+  padding: 20px 24px; background: var(--px-peach);
+}
+.callout > div { flex: 1 1 200px; display: grid; gap: 4px; }
+.callout p { margin: 0; }
+
+.limits { margin: 0; padding-left: 20px; display: grid; gap: 6px; color: var(--fox-text-2); }
+
+/* ---------- Text pages (privacy, moved) ---------- */
+.page-head { padding: 56px 0 32px; display: grid; gap: 12px; }
+.page-head p { margin: 0; max-width: 60ch; color: var(--fox-text-2); font-size: 18px; }
+.prose { overflow-wrap: anywhere; max-width: 760px; padding: 32px; margin-bottom: 72px; }
+.prose h1 { display: none; } /* the page head already shows the title */
+.prose h2 { font-size: 24px; margin: 32px 0 8px; }
+.prose h3 { font-size: 18px; margin: 20px 0 4px; }
+.prose > :first-child { margin-top: 0; }
+.prose hr { border: 0; border-top: 2px solid var(--px-silver); margin: 32px 0; }
+.prose li + li { margin-top: 4px; }
+
+/* /moved */
+.moved-art { width: min(100%, 480px); image-rendering: pixelated; }
+.howto { display: grid; gap: 16px; margin: 0 0 32px; padding: 0; list-style: none; counter-reset: howto; max-width: 760px; }
+.howto li { display: grid; grid-template-columns: 48px 1fr; gap: 16px; padding: 20px; counter-increment: howto; }
+.howto li::before {
+  content: counter(howto);
+  display: flex; align-items: center; justify-content: center; width: 48px; height: 48px;
+  font: 24px/1 var(--fox-font-pixel); background: var(--px-orange); border: 2px solid var(--px-black);
+}
+.howto h3 { margin-bottom: 4px; }
+.howto p { margin: 0; color: var(--fox-text-2); }
+.faq { display: grid; gap: 12px; max-width: 760px; margin-bottom: 72px; }
+.faq details { padding: 14px 20px; }
+.faq summary { font: 16px/1.4 var(--fox-font-pixel); cursor: pointer; }
+.faq details p { margin: 8px 0 0; color: var(--fox-text-2); }
+
+/* ---------- Motion (DESIGN.md §2.4): short, stepped, never blocking ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* ---------- Playground ---------- */
+.playground { margin-bottom: 72px; }
+.pg-buttons { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+.pg-count { min-width: 2ch; padding: 2px 4px; background: var(--px-white); border: 2px solid var(--px-black); font-size: 14px; }
+.pg-tiles { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 8px; }
+.pg-tile {
+  aspect-ratio: 1; font: 24px/1 var(--fox-font-pixel); color: var(--px-black); cursor: pointer;
+  background: var(--px-white); border: 2px solid var(--px-black); box-shadow: inset -2px -2px 0 var(--px-silver), 2px 2px 0 var(--px-black);
+}
+.pg-tile.is-done { background: var(--px-green); box-shadow: inset -2px -2px 0 var(--px-pine), 2px 2px 0 var(--px-black); }
+.pg-feed { justify-items: start; }
+.pg-fox { padding: 12px; cursor: pointer; }
+.pg-fox:active { transform: translate(2px, 2px); }
+.pg-reset { grid-column: 1 / -1; }

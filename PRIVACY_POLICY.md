@@ -1,6 +1,6 @@
 # Privacy Policy for Fox Macro Recorder
 
-**Last Updated:** December 25, 2024
+**Last Updated:** October 3, 2026
 
 ## Overview
 
@@ -71,7 +71,7 @@ Fox Macro Recorder does not:
 - All data remains on your local device
 - No network transmission means no interception risk
 - Your macros are as secure as your browser's local storage
-- You can export/import macros as JSON files for personal backup
+- You can export/import macros as JSON files for personal backup (Settings → Macros); the file is saved where you choose and never uploaded
 
 ## User Rights
 
@@ -101,8 +101,7 @@ Your data is permanently deleted and cannot be recovered.
 ## Contact
 
 For privacy concerns or questions about this policy:
-- Create an issue in the project repository
-- Contact: [Your contact information or support email]
+- Open an issue at https://github.com/panat54083/chrome-macro-recorder/issues
 
 ## Compliance
 

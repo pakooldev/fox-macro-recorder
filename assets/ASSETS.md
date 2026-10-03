@@ -163,6 +163,24 @@ Both are already in the repo; nothing to do here.
 
 ---
 
+## Website (fox-macro.pakool.com), requested 2026-10-03
+
+The site (`website/`) reuses everything above: the mascot sheet, logo, icons, font and the marquee (as the landing hero). One new image:
+
+| # | File (raw) | Art grid | Final output | Used on |
+|---|---|---|---|---|
+| W1 | `web-moving.png` | ~96×64 art pixels | `assets/web/moving.png` (transparent, shown at 2× or 3×) | `/moved` page header, "Fox moved house" |
+
+### W1: Fox moving house
+
+> Using the attached fox as the exact character design: one pixel art scene, about 96×64 art pixels shown greatly enlarged. The fox walks to the right carrying a cardboard moving box (#AB5236 / #FFCCAA tape) on its head with both front paws, tail up and happy. Behind it on the left a small old dark-grey (#5F574F) house with a "for rent" style blank sign (no text); ahead on the right a small new house with an orange (#FFA300) roof and a lit yellow (#FFEC27) window. Two or three tiny macro cards (cream squares with a blue cursor and a red target, like inventory slots) float out of the box. A short dotted path joins the two houses. [style block] (keep the plain removable background)
+
+If it doesn't come out well the page simply shows the mascot's play row (running fox) instead, so this is optional.
+
+- [x] W1 → `assets/raw/web-moving.png`
+
+---
+
 ## Checklist
 
 - [x] G1 reference picked

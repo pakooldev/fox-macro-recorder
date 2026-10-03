@@ -271,3 +271,20 @@ Brand/mascot art (toolbar icon, mascot sprites, store promo art) is custom pixel
   Animate with `background-position-x` from `0` to `-58N px` using `steps(N)`; at 2× use `background-size: 464px 696px` and double the offsets.
 - **Other built assets:** `assets/sprites/logo.png` (32×32 head), `icons/icon16|48|128.png` (manifest/store), `assets/store/promo-small-440x280.png`, `assets/store/promo-marquee-1400x560.png`. All are rebuilt from `assets/raw/` by `python3 assets/clean.py`.
 - **Keep the existing class names/ids** where possible (`#fox-panel`, `.fox-macro-card`, `#fox-record-btn`, …) so `content/*.js` and the e2e checks don't change; this is a CSS + markup-icon swap, not a logic rewrite.
+
+---
+
+## 6. Website (fox-macro.pakool.com)
+
+`website/` (Next.js static export → Cloudflare Pages, `.github/workflows/deploy-website.yml`) uses this design system, never a copy of it. `website/scripts/sync-design.mjs` runs before every `dev`/`build` and writes git-ignored files from the extension:
+
+| From | To | What |
+|---|---|---|
+| `content/styles.js` | `website/generated/fox-shared.css` | the `:host` token block (as `:root`), the mascot sprite section, the sprite keyframes |
+| `content/icons.js` | `website/generated/icons.json` | the panel's pixel icons (`<Icon name>`) |
+| `manifest.json` | `website/generated/meta.json` | name, version, shortcut |
+| `assets/`, `icons/icon*.png` | `website/public/` | font, sprites, store art (same paths, so `url("/assets/…")` matches the extension's asset paths) |
+
+So a color, icon or sprite changed in the extension changes on the site at the next build. Site-only additions in `website/app/globals.css`: page layout, the `.raised` / `.inset` recipes from §2.3 as classes, buttons (§3 bevel colors), keycaps, and one non-palette color, `--web-night: #122965`, sampled from the marquee art so the landing hero band continues its sky. The same rules apply: hard edges, 2px pixel, Tiny5 for headings/labels/buttons (min 14px) and the system font for body text, motion ≤160ms in steps, off under reduced motion.
+
+Pages: `/` (marquee as the hero, features, 3 steps with the mascot states, limits, link to /moved), `/playground/` (click targets with counters for trying and testing macros; also the backdrop for store screenshots), `/moved/` (migration guide for "Fox Auto Clicker" users; legacy 2.0.2 links here), `/privacy/` (renders `PRIVACY_POLICY.md` at build). The store link is `STORE_URL` in `website/components/site.ts`: `null` shows "Coming soon to Chrome".

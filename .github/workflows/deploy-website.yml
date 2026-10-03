@@ -1,0 +1,53 @@
+name: Deploy Website
+
+# fox-macro.pakool.com. The site reads the extension's styles, icons, assets,
+# manifest and privacy policy at build time, so changes there redeploy it too.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "website/**"
+      - "content/styles.js"
+      - "content/icons.js"
+      - "assets/**"
+      - "icons/**"
+      - "manifest.json"
+      - "PRIVACY_POLICY.md"
+      - ".github/workflows/deploy-website.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+
+      - name: Build static site
+        working-directory: website
+        run: |
+          npm ci
+          npm run build
+
+      # pages deploy fails if the project doesn't exist; no-op after the first run
+      - name: Ensure Cloudflare Pages project exists
+        uses: cloudflare/wrangler-action@v3
+        continue-on-error: true
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages project create fox-macro --production-branch=main
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy website/out --project-name=fox-macro --commit-dirty=true
