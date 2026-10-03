@@ -99,7 +99,7 @@ function renderMode() {
 })();
 
 // ==========================================
-// Popup messages
+// Toolbar icon messages (background.js)
 // ==========================================
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   const panel = state.panel;

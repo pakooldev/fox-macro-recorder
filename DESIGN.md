@@ -1,6 +1,6 @@
 # Fox Macro — Design System ("Pixel Fox")
 
-Single source of truth for how every Fox surface looks: the in-page panel (and its edit/inspector panels, FAB, toasts, click feedback), the extension popup, the toolbar icon and the store listing. The current indigo/rounded "SaaS" look in `content/styles.js` is replaced wholesale by this.
+Single source of truth for how every Fox surface looks: the in-page panel (and its edit/inspector panels, FAB, toasts, click feedback), the toolbar icon and the store listing. There is no extension popup: clicking the toolbar icon toggles the panel. The current indigo/rounded "SaaS" look in `content/styles.js` is replaced wholesale by this.
 
 Assets this design needs (sprites, icon set, font) are listed with generation prompts in [`assets/ASSETS.md`](assets/ASSETS.md).
 
@@ -23,7 +23,7 @@ Principles, in priority order:
 
 ## 2. Tokens
 
-All tokens are CSS custom properties declared on `:host, :root` at the top of `getFoxStyles()` in `content/styles.js`. The popup loads the same `content/styles.js` and injects the same string, so there is exactly one copy (today `popup/popup.html` has its own inline styles — that duplication goes away in the refactor).
+All tokens are CSS custom properties declared on `:host` at the top of `getFoxStyles()` in `content/styles.js`, the only stylesheet.
 
 ### 2.1 Palette
 
@@ -32,7 +32,7 @@ The PICO-8 16-color palette. Its orange/brown/peach/cream give the fox; red, blu
 | Token | Hex | Role |
 |---|---|---|
 | `--px-black` | `#000000` | Outer outline of every box, hard shadows, inset (input) backgrounds |
-| `--px-navy` | `#1D2B53` | Panel / popup / toast background |
+| `--px-navy` | `#1D2B53` | Panel / toast background |
 | `--px-plum` | `#7E2553` | Bevel shade on red (record/danger) elements |
 | `--px-pine` | `#008751` | Bevel shade on green elements |
 | `--px-brown` | `#AB5236` | Fox shading; bevel shade on orange elements |
@@ -80,7 +80,7 @@ Scale (px): `10` micro (section labels, uppercase, +1px letter-spacing) · `12` 
 
 - Spacing unit `4px`; use `4 / 8 / 12 / 16 / 24`.
 - Control sizes: main control bar buttons `40px`, icon buttons and card actions `32px`, icons `24px`, inputs `32px` tall.
-- Panel width `360px` (min `280px`), edit panel `340px`, popup `240px`.
+- Panel width `360px` (min `280px`), edit panel `340px`.
 - `--fox-radius: 0` everywhere.
 
 Two box recipes cover everything:
@@ -204,13 +204,9 @@ Pure CSS, no assets:
 
 Inside the panel (`::-webkit-scrollbar`): 10px wide, black track, lavender square thumb with a cream top-left bevel, no arrows.
 
-### 3.13 Popup (`popup/`)
+### 3.13 Toolbar icon (no popup)
 
-240px wide, navy, same tokens (loads `content/styles.js`).
-- Header: logo at 1× (32px) + "FOX MACRO" in pixel 16px.
-- Center: mascot at 2× (116px) showing `idle` when the panel is hidden on this tab and `play`-ready pose (`idle` frame 2 is fine) when visible; `error` frame plus `CAN'T RUN ON THIS PAGE` on restricted pages.
-- One full-width button: `SHOW PANEL` (orange) / `HIDE PANEL` (silver) — text, not today's eye emoji.
-- Footer: coffee link.
+Clicking the icon toggles the panel on the current tab (`background.js`). On pages extensions can't touch (`chrome://`, the Web Store) the icon gets a `!` badge and the tooltip "Fox can't run on this page", scoped to that tab. The coffee link lives in Settings → About. The mascot `error` frame is kept in the sheet for a future error state but is unused for now.
 
 ---
 

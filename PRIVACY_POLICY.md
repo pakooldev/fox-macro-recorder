@@ -54,7 +54,7 @@ We do not:
 Required to save your recorded macros locally in your browser. Without this permission, the extension cannot function.
 
 ### Active Tab and Scripting Permissions
-Required to record and replay clicks on a website you choose. When you press the button in the extension popup, the recorder panel is added to that tab only. The extension:
+Required to record and replay clicks on a website you choose. When you click the extension icon, the recorder panel is added to that tab only. The extension:
 - Has no access to any website until you open the panel there
 - Does not collect or transmit any website data
 

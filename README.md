@@ -122,12 +122,11 @@ Make sure these icon files exist in the `icons/` folder:
 
 ### Recording a Macro
 
-1. Click the Fox Macro Recorder extension icon
-2. Click "Show Panel" to display the control panel
-3. Click the **Record** button
-4. Perform your click actions on the webpage
-5. Click **Stop** when finished
-6. Enter a name for your macro, adjust the domain if needed, and click **Save**
+1. Click the Fox Macro Recorder extension icon: the control panel opens on the page (click it again to hide it)
+2. Click the **Record** button
+3. Perform your click actions on the webpage
+4. Click **Stop** when finished
+5. Enter a name for your macro, adjust the domain if needed, and click **Save**
 
 ### Playing Back a Macro
 
@@ -145,7 +144,7 @@ Make sure these icon files exist in the `icons/` folder:
 
 ### Panel Controls
 
-- **Show/Hide Panel**: Toggle via extension popup (stays hidden by default)
+- **Show/Hide Panel**: Click the extension icon (pages like `chrome://` show a `!` badge: extensions can't run there)
 - **Drag to Move**: Click and drag any panel header to reposition it
 - **Minimal Mode**: Click ▪ button to toggle compact control-bar-only mode
 - **Settings Button**: Access random delay and other settings via ⚙️ button
@@ -244,7 +243,7 @@ Access via the ⚙️ button in the main panel:
 - **Mini Control Bar** - Quick access to record/play/stop when collapsed
 - **Status Indicators** - Color-coded status dots (gray=ready, red=recording, blue=playing)
 - **Multiple Panels** - Main panel, edit panel, inspector panel, settings panel
-- **Hide by Default** - Panel stays hidden until activated via extension popup
+- **Hide by Default** - Nothing appears on a page until you click the extension icon
 - **Gradient Headers** - Beautiful purple gradient design
 - **Responsive Layout** - Adapts to different screen sizes
 
@@ -306,7 +305,7 @@ Access via the ⚙️ button in the main panel:
 ## Technical Details
 
 - **Manifest Version**: 3 (Latest Chrome Extension standard)
-- **Permissions**: `storage` (save macros), `activeTab` + `scripting` (inject the panel into the current tab when you press the popup button)
+- **Permissions**: `storage` (save macros), `activeTab` + `scripting` (inject the panel into the current tab when you click the extension icon)
 - **Works On**: All URLs (you choose where to use it)
 - **Storage**: Chrome local storage API
 
@@ -325,9 +324,7 @@ fox-macro-recorder/
 │   ├── macros.js          # Macro list + CRUD
 │   ├── panels/            # main, edit, inspector, settings
 │   └── components/        # fab, toast
-├── popup/
-│   ├── popup.html         # Extension popup UI
-│   └── popup.js           # Toggle button; injects content/ (file list lives here)
+├── background.js          # Icon click toggles the panel; injects content/ (file list lives here)
 ├── tests/                 # node --test tests/*.test.mjs
 └── icons/
     ├── icon16.png        # Extension icons
@@ -354,14 +351,14 @@ fox-macro-recorder/
 **Permissions Requested:**
 1. **`storage`** - Required to save user-recorded macros locally in the browser's storage. Users can create, save, and manage multiple macros that persist across browser sessions.
 
-2. **`activeTab` + `scripting`** - When the user presses the button in the extension popup, the recorder panel is injected into that one tab so they can record and replay clicks there. Nothing is injected into any page until the user does this, and the extension has no standing access to any website.
+2. **`activeTab` + `scripting`** - When the user clicks the extension icon, the recorder panel is injected into that one tab so they can record and replay clicks there. Nothing is injected into any page until the user does this, and the extension has no standing access to any website.
 
 **Privacy Guarantees:**
 - ✅ All data stored locally in browser (chrome.storage.local)
 - ✅ No external servers or network connections
 - ✅ No data collection, tracking, or analytics
 - ✅ No user data sharing or transmission
-- ✅ Nothing runs on a page until the user opens the panel from the popup
+- ✅ Nothing runs on a page until the user clicks the extension icon
 
 **Remote Code:**
 - ❌ **NO remote code used** - All code is packaged within the extension
