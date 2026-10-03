@@ -7,6 +7,7 @@ const CONTENT_FILES = [
   'content/utils.js',
   'content/icons.js',
   'content/store.js',
+  'content/transfer.js',
   'content/styles.js',
   'content/components/toast.js',
   'content/components/fab.js',

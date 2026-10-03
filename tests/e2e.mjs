@@ -141,6 +141,36 @@ try {
     await page.click('.fox-tab-btn[data-tab="home"]');
   });
 
+  await check('export all macros to a JSON file, then import it (and a v1.x file) without duplicates', async () => {
+    await page.click('.fox-tab-btn[data-tab="settings"]');
+    const [download] = await Promise.all([page.waitForEvent('download'), page.click('#fox-export-btn')]);
+    assert.match(download.suggestedFilename(), /^fox-macros-\d{4}-\d{2}-\d{2}\.json$/);
+    const exported = JSON.parse(readFileSync(await download.path(), 'utf8'));
+    assert.equal(exported.app, 'fox-macro-recorder');
+    assert.equal(exported.macros.length, 1);
+
+    // same file again: nothing added
+    await page.setInputFiles('#fox-import-file', { name: 'back.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(exported)) });
+    await page.waitForFunction(() => /^Imported 0 macros \(1 already here\)/.test(document.querySelector('#fox-macro-shadow-host').shadowRoot.querySelector('.fox-toast-text')?.textContent));
+
+    // a v1.x export (one macro per file, no domain) is added
+    const v1 = { id: '1700000000000', name: 'From v1', createdAt: '2026-01-01T00:00:00.000Z', actions: [{ type: 'click', x: 450, y: 320, timestamp: 0 }] };
+    await page.setInputFiles('#fox-import-file', { name: 'v1.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(v1)) });
+    await page.waitForFunction(() => document.querySelector('#fox-macro-shadow-host').shadowRoot.querySelector('.fox-toast-text')?.textContent === 'Imported 1 macro');
+
+    // not a macro file
+    await page.setInputFiles('#fox-import-file', { name: 'x.json', mimeType: 'application/json', buffer: Buffer.from('{"hello":1}') });
+    await page.waitForFunction(() => document.querySelector('#fox-macro-shadow-host').shadowRoot.querySelector('.fox-toast-text')?.textContent === 'Import failed: No macros in this file');
+
+    await page.click('.fox-tab-btn[data-tab="home"]');
+    await page.waitForSelector('.fox-macro-card[data-id="1700000000000"]');
+    await page.locator('.fox-macro-card[data-id="1700000000000"] [data-action="delete"]').click();
+    await page.click('[data-action="confirm-delete"]');
+    await page.waitForSelector('.fox-macro-card[data-id="1700000000000"]', { state: 'detached' });
+    assert.equal(await page.inputValue('#fox-domain-filter'), '__all__', 'after an import the list shows all sites');
+    await page.selectOption('#fox-domain-filter', 'localhost');
+  });
+
   await check('B10: the panel cannot be dragged off screen', async () => {
     const h = await page.locator('.fox-title').boundingBox();
     await page.mouse.move(h.x + 5, h.y + 5);

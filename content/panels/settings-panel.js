@@ -33,6 +33,16 @@ function renderSettingsTab() {
       </section>
 
       <section class="fox-settings-card">
+        <h3 class="fox-settings-card-title">${icon('archive')}<span>Macros</span></h3>
+        <p class="fox-settings-hint">Back up your macros, or move them from another browser or from the old Fox Auto Clicker.</p>
+        <div class="fox-transfer-row">
+          <button class="fox-snap-clear" id="fox-export-btn">${icon('download')}<span>Export all</span></button>
+          <button class="fox-snap-clear" id="fox-import-btn">${icon('upload')}<span>Import…</span></button>
+          <input type="file" id="fox-import-file" accept=".json,application/json" hidden>
+        </div>
+      </section>
+
+      <section class="fox-settings-card">
         <h3 class="fox-settings-card-title">${icon('keyboard')}<span>Shortcut</span></h3>
         <div class="fox-settings-row">
           <span class="fox-settings-name">Show / hide panel</span>
@@ -58,6 +68,13 @@ function renderSettingsTab() {
     const sites = new Set(macros.map(m => m.domain).filter(Boolean)).size;
     const el = container.querySelector('#fox-about-stats');
     if (el) el.textContent = `${macros.length} macro${macros.length === 1 ? '' : 's'} saved · ${sites} site${sites === 1 ? '' : 's'}`;
+  });
+
+  container.querySelector('#fox-export-btn').addEventListener('click', exportMacros);
+  const fileInput = container.querySelector('#fox-import-file');
+  container.querySelector('#fox-import-btn').addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) importMacros(fileInput.files[0]);
   });
 
   // chrome:// pages can't be linked from a web page; background.js opens it
@@ -91,4 +108,47 @@ function renderSettingsTab() {
     maxInput.value = Math.max(s.randomDelayMin, parseInt(maxInput.value) || 0);
     set('randomDelayMax', Number(maxInput.value));
   });
+}
+
+async function exportMacros() {
+  const macros = await getMacros();
+  if (macros.length === 0) {
+    showToast('No macros to export yet', 'info');
+    return;
+  }
+  const url = URL.createObjectURL(new Blob([buildExport(macros)], { type: 'application/json' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = exportFileName();
+  state.root.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast(`Exported ${macros.length} macro${macros.length === 1 ? '' : 's'}`, 'success');
+}
+
+async function importMacros(file) {
+  let parsed;
+  try {
+    if (file.size > 5 * 1024 * 1024) throw new Error('File is too big');
+    parsed = parseImport(await file.text());
+  } catch (e) {
+    showToast(`Import failed: ${e.message}`, 'error', 4000);
+    return;
+  }
+  let result;
+  await updateMacros(existing => {
+    result = mergeImported(existing, parsed.macros);
+    return result.macros;
+  });
+  const notes = [
+    result.skipped && `${result.skipped} already here`,
+    parsed.invalid && `${parsed.invalid} invalid`
+  ].filter(Boolean);
+  // imported macros are often for other sites: show everything
+  state.domainFilter = '__all__';
+  await loadMacros();
+  renderSettingsTab();
+  showToast(`Imported ${result.added} macro${result.added === 1 ? '' : 's'}${notes.length ? ` (${notes.join(', ')})` : ''}`,
+    result.added ? 'success' : 'info', 4000);
 }

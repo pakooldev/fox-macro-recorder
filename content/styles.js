@@ -341,6 +341,8 @@ function getFoxStyles() {
       font: 14px var(--fox-font-ui);
     }
     .fox-shortcut-change { align-self: flex-start; }
+    .fox-transfer-row { display: flex; gap: 8px; }
+    .fox-transfer-row .fox-snap-clear { height: 32px; gap: 4px; padding: 0 10px 0 6px; }
 
     .fox-about { flex-direction: row; align-items: center; gap: 10px; padding-top: 10px; }
     .fox-about-text { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
