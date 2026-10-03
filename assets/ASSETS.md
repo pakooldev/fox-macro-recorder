@@ -24,7 +24,7 @@ Raw images are in `assets/raw/` (git-ignored). `python3 assets/clean.py` rebuild
 | `assets/store/promo-small-440x280.png` | 440×280 | G10 (resized, not palette-snapped) |
 | `assets/store/promo-marquee-1400x560.png` | 1400×560 | G11 (resized, not palette-snapped) |
 
-Differences from the plan below: the AI drew the fox on a ~40–50 cell grid, not 24×24, and the "16×16" icon on ~32. Those native grids were kept (downscaling to 24 would turn the eyes into single pixels), so the mascot frame is 58×58 and the sprites use a fur ramp extracted from the art instead of strict PICO-8 (see DESIGN.md §2.1). If a pose is regenerated, drop it into `assets/raw/` with the same name and rerun the script.
+Differences from the plan below: the AI drew the fox on a ~40–50 cell grid, not 24×24, and the "16×16" icon on ~32. Those native grids were kept (downscaling to 24 would turn the eyes into single pixels), so the mascot frame is 58×58 and the sprites use a fur ramp extracted from the art instead of strict PICO-8 (see DESIGN.md §2.1). Small cream specks floating apart from the fox (the sleeping "z"s) are redrawn in black so they show on the light panel. If a pose is regenerated, drop it into `assets/raw/` with the same name and rerun the script.
 
 ---
 

@@ -174,6 +174,34 @@ def split_frames(idx, n):
     return frames
 
 
+def ink_floating_cream(frame, palette, max_cells=40):
+    """Small detached cream specks (the sleeping "z"s) vanish on the light panel:
+    redraw them in black. The fox's own cream fur is attached to the body, so it stays."""
+    # light, low-saturation colors (cream/peach); excludes yellow sparkles and the red ball
+    cream = {i for i, c in enumerate(palette) if i and c.min() > 140 and c.max() - c.min() < 110}
+    black = int(np.abs(palette[1:]).sum(1).argmin()) + 1
+    seen = np.zeros(frame.shape, bool)
+    h, w = frame.shape
+    for y0 in range(h):
+        for x0 in range(w):
+            if frame[y0, x0] == 0 or seen[y0, x0]:
+                continue
+            comp, stack = [], [(y0, x0)]
+            seen[y0, x0] = True
+            while stack:
+                y, x = stack.pop()
+                comp.append((y, x))
+                for ny, nx in ((y + 1, x), (y - 1, x), (y, x + 1), (y, x - 1)):
+                    if 0 <= ny < h and 0 <= nx < w and frame[ny, nx] and not seen[ny, nx]:
+                        seen[ny, nx] = True
+                        stack.append((ny, nx))
+            # mostly cream: edge cells of a letter can snap to a blended darker shade
+            if len(comp) <= max_cells and sum(frame[c] in cream for c in comp) * 2 >= len(comp):
+                for c in comp:
+                    frame[c] = black
+    return frame
+
+
 def place(frame, w, h, align='bottom'):
     """Center frame horizontally in a w×h canvas, bottom-aligned (shared baseline)."""
     out = np.zeros((h, w), dtype=int)
@@ -214,7 +242,7 @@ def build():
     sheet = np.zeros((fh * len(rows), fw * cols), dtype=int)
     for r, frames in enumerate(rows):
         for c, f in enumerate(frames):
-            sheet[r * fh:(r + 1) * fh, c * fw:(c + 1) * fw] = place(f, fw, fh)
+            sheet[r * fh:(r + 1) * fh, c * fw:(c + 1) * fw] = place(ink_floating_cream(f, palette), fw, fh)
     save(sheet, palette, OUT / 'mascot.png')
 
     # Logo (header/popup, shown 1×) from the simpler head; toolbar 16px from the same art

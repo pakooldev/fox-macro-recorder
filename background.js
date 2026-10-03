@@ -41,3 +41,12 @@ chrome.action.onClicked.addListener(async (tab) => {
     await chrome.action.setTitle({ tabId: tab.id, title: "Fox can't run on this page" });
   }
 });
+
+// The panel shows the user's current toggle shortcut (content scripts can't read chrome.commands)
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action !== 'getShortcut') return;
+  chrome.commands.getAll().then(commands => {
+    sendResponse(commands.find(c => c.name === '_execute_action')?.shortcut || '');
+  });
+  return true;
+});

@@ -13,6 +13,7 @@ const state = {
   recordedActions: [],
   activeTab: 'home',
   isPanelMinimized: false,
+  shortcut: '',            // toolbar toggle shortcut, from background.js
   settings: { ...DEFAULT_SETTINGS }
 };
 
@@ -106,6 +107,12 @@ async function loadPixelFont() {
     state.settings = settings;
     renderSettingsTab();
   });
+
+  chrome.runtime.sendMessage({ action: 'getShortcut' }).then(shortcut => {
+    state.shortcut = shortcut;
+    q('#fox-close-btn').title = shortcut ? `Close (${shortcut})` : 'Close';
+    renderSettingsTab();
+  }).catch(() => {});
 })();
 
 // ==========================================

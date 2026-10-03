@@ -122,7 +122,7 @@ Make sure these icon files exist in the `icons/` folder:
 
 ### Recording a Macro
 
-1. Click the Fox Macro Recorder extension icon: the control panel opens on the page (click it again to hide it)
+1. Click the Fox Macro Recorder extension icon, or press `Alt+Shift+F` (`Option+Shift+F` on Mac): the control panel opens on the page (do it again to hide it)
 2. Click the **Record** button
 3. Perform your click actions on the webpage
 4. Click **Stop** when finished
@@ -144,7 +144,7 @@ Make sure these icon files exist in the `icons/` folder:
 
 ### Panel Controls
 
-- **Show/Hide Panel**: Click the extension icon (pages like `chrome://` show a `!` badge: extensions can't run there)
+- **Show/Hide Panel**: Click the extension icon or press `Alt+Shift+F` / `Option+Shift+F` (change it at `chrome://extensions/shortcuts`) (pages like `chrome://` show a `!` badge: extensions can't run there)
 - **Drag to Move**: Click and drag any panel header to reposition it
 - **Minimal Mode**: Click ▪ button to toggle compact control-bar-only mode
 - **Settings Button**: Access random delay and other settings via ⚙️ button

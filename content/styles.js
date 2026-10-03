@@ -15,12 +15,18 @@ function getFoxStyles() {
       --px-red: #FF004D;      --px-orange: #FFA300;   --px-yellow: #FFEC27;  --px-green: #00E436;
       --px-blue: #29ADFF;     --px-lavender: #83769C; --px-pink: #FF77A8;    --px-peach: #FFCCAA;
 
-      --fox-bg: var(--px-navy);
-      --fox-inset: var(--px-black);
-      --fox-line: var(--px-lavender);
-      --fox-text: var(--px-cream);
-      --fox-text-2: var(--px-silver);
-      --fox-text-muted: var(--px-lavender);
+      --px-white: #FFFFFF;    /* the one non-PICO-8 color: card/input surfaces */
+
+      /* Light theme (DESIGN.md §2.1) */
+      --fox-bg: var(--px-cream);          /* panel body */
+      --fox-surface: var(--px-white);     /* cards, inputs, lists */
+      --fox-bevel-hi: var(--px-white);
+      --fox-bevel-lo: var(--px-silver);
+      --fox-line: var(--px-stone);        /* rules, grips, scrollbar thumb */
+      --fox-text: var(--px-black);
+      --fox-text-2: var(--px-stone);      /* secondary text, labels: 6.4:1 on cream */
+      --fox-placeholder: var(--px-lavender);
+      --fox-link: var(--px-brown);        /* orange on cream is only 1.9:1 */
 
       --fox-font-pixel: 'FoxPixel', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       --fox-font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans Thai', sans-serif;
@@ -50,7 +56,7 @@ function getFoxStyles() {
       background: var(--fox-bg);
       color: var(--fox-text);
       border: 2px solid var(--px-black);
-      box-shadow: inset 2px 2px 0 var(--px-lavender), inset -2px -2px 0 var(--px-black), 6px 6px 0 var(--px-black);
+      box-shadow: inset 2px 2px 0 var(--fox-bevel-hi), inset -2px -2px 0 var(--fox-bevel-lo), 6px 6px 0 var(--px-black);
       font: 14px/1.4 var(--fox-font-pixel);
       z-index: 2147483647;
     }
@@ -99,7 +105,7 @@ function getFoxStyles() {
       color: var(--px-black);
     }
     .fox-tab-btn:hover, .fox-icon-btn:hover { box-shadow: inset 0 0 0 2px var(--px-black); }
-    .fox-tab-btn.active { background: var(--fox-bg); color: var(--fox-text); box-shadow: inset 2px 2px 0 var(--px-lavender); }
+    .fox-tab-btn.active { background: var(--fox-bg); color: var(--fox-text); box-shadow: inset 2px 2px 0 var(--fox-bevel-hi); }
 
     /* Tabs */
     .fox-tab-content { display: none; flex: 1; min-height: 0; overflow-y: auto; }
@@ -124,7 +130,7 @@ function getFoxStyles() {
     .fox-ctrl-btn { width: 40px; height: 40px; }
     .fox-action-btn { width: 32px; height: 32px; }
     .fox-save-btn, .fox-edit-save-btn, .fox-btn-cancel-delete, .fox-btn-confirm-delete { height: 32px; padding: 0 10px; }
-    .fox-snap-clear { height: 24px; padding: 0 8px; font-size: 10px; }
+    .fox-snap-clear { height: 24px; padding: 0 8px; }
 
     .fox-btn-record, .fox-btn-confirm-delete { --fill: var(--px-red); --hi: var(--px-pink); --lo: var(--px-plum); }
     .fox-btn-play-main, .fox-abtn-play { --fill: var(--px-blue); --hi: var(--px-cream); --lo: var(--px-navy); }
@@ -142,8 +148,9 @@ function getFoxStyles() {
       box-shadow: inset 2px 2px 0 var(--hi), inset -2px -2px 0 var(--lo);
     }
     :is(.fox-ctrl-btn, .fox-action-btn):disabled {
-      --fill: var(--px-stone); --hi: var(--px-stone); --lo: var(--px-stone);
+      --fill: var(--fox-bg);
       color: var(--px-silver);
+      border-color: var(--px-silver);
       box-shadow: none;
       cursor: not-allowed;
     }
@@ -160,22 +167,22 @@ function getFoxStyles() {
       height: 32px;
       min-width: 0;
       padding: 0 8px;
-      background: var(--fox-inset);
+      background: var(--fox-surface);
       color: var(--fox-text);
       border: 2px solid var(--px-black);
-      box-shadow: inset 2px 2px 0 var(--px-stone);
+      box-shadow: inset 2px 2px 0 var(--fox-bevel-lo);
       font: 14px var(--fox-font-ui);
       border-radius: 0;
       outline: none;
     }
-    input::placeholder { color: var(--fox-text-muted); }
+    input::placeholder { color: var(--fox-placeholder); }
     input[type="number"] { font: 12px var(--fox-font-pixel); text-align: right; -moz-appearance: textfield; }
     input[type="number"]::-webkit-inner-spin-button,
     input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
     .fox-select { position: relative; display: flex; flex: 1; min-width: 0; }
     .fox-select select { flex: 1; appearance: none; padding-right: 32px; cursor: pointer; }
-    .fox-select select:disabled { color: var(--fox-text-muted); cursor: not-allowed; }
+    .fox-select select:disabled { color: var(--fox-placeholder); cursor: not-allowed; }
     .fox-select .fox-icon { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--fox-text-2); }
     .fox-control-bar .fox-select select { height: 40px; }
 
@@ -191,9 +198,9 @@ function getFoxStyles() {
       height: 28px;
       margin: 0 8px 8px;
       padding: 0 8px;
-      background: var(--fox-inset);
+      background: var(--fox-surface);
       border: 2px solid var(--px-black);
-      box-shadow: inset 2px 2px 0 var(--px-stone);
+      box-shadow: inset 2px 2px 0 var(--fox-bevel-lo);
       font-size: 12px;
       font-weight: 700;
       letter-spacing: 1px;
@@ -201,9 +208,7 @@ function getFoxStyles() {
     .fox-status-strip.visible { display: flex; }
     .fox-status-left { display: flex; align-items: center; gap: 8px; }
     .fox-status-dot { width: 8px; height: 8px; background: var(--px-blue); }
-    .fox-status-strip.recording .fox-status-left { color: var(--px-red); }
     .fox-status-strip.recording .fox-status-dot { background: var(--px-red); animation: fox-blink 1s steps(2, jump-none) infinite; }
-    .fox-status-strip.playing .fox-status-left { color: var(--px-blue); }
 
     .fox-save-bar { display: none; flex-direction: column; gap: 8px; padding: 0 8px 8px; }
     .fox-save-bar.visible { display: flex; }
@@ -217,8 +222,8 @@ function getFoxStyles() {
     .fox-domain-group-header {
       display: flex; align-items: center; gap: 8px;
       margin: 4px 0 8px;
-      color: var(--fox-text-muted);
-      font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--fox-text-2);
+      font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
     }
     .fox-domain-group-header::after { content: ''; flex: 1; height: 2px; background: var(--fox-line); }
 
@@ -226,12 +231,12 @@ function getFoxStyles() {
       display: flex; flex-direction: column; gap: 8px;
       margin-bottom: 8px;
       padding: 8px;
-      background: var(--fox-bg);
-      border: 2px solid var(--fox-line);
+      background: var(--fox-surface);
+      border: 2px solid var(--px-black);
       box-shadow: 2px 2px 0 var(--px-black);
     }
     .fox-macro-card:has(.fox-abtn-stop) { border-color: var(--px-blue); }
-    .fox-macro-card.confirm-delete { background: var(--px-plum); border-color: var(--px-red); }
+    .fox-macro-card.confirm-delete { background: var(--px-peach); border-color: var(--px-red); }
 
     .fox-macro-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
     .fox-macro-name {
@@ -239,7 +244,7 @@ function getFoxStyles() {
       font: 14px var(--fox-font-ui);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .fox-macro-info { flex: none; color: var(--fox-text-2); font-size: 12px; }
+    .fox-macro-info { flex: none; color: var(--fox-text-2); font-size: 13px; }
 
     .fox-macro-row2 { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .fox-macro-actions { display: flex; gap: 6px; }
@@ -265,18 +270,18 @@ function getFoxStyles() {
        ========================================== */
     .fox-settings-body { display: flex; flex-direction: column; gap: 16px; padding: 10px 8px 12px; }
     .fox-settings-group { display: flex; flex-direction: column; gap: 8px; }
-    .fox-section-label { color: var(--fox-text-muted); font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+    .fox-section-label { color: var(--fox-text-2); font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
     .fox-settings-row { display: flex; align-items: center; justify-content: space-between; }
     .fox-settings-label { display: flex; align-items: center; gap: 8px; }
-    .fox-settings-icon { color: var(--px-orange); }
+    .fox-settings-icon { color: var(--fox-link); }
 
     .fox-toggle {
       position: relative;
       width: 36px; height: 20px;
       flex: none;
-      background: var(--fox-inset);
+      background: var(--fox-surface);
       border: 2px solid var(--px-black);
-      box-shadow: inset 2px 2px 0 var(--px-stone);
+      box-shadow: inset 2px 2px 0 var(--fox-bevel-lo);
       cursor: pointer;
     }
     .fox-toggle-knob {
@@ -286,7 +291,7 @@ function getFoxStyles() {
       transition: left var(--fox-step-fast);
     }
     .fox-toggle.active { background: var(--px-green); box-shadow: inset 2px 2px 0 var(--px-pine); }
-    .fox-toggle.active .fox-toggle-knob { left: 18px; background: var(--px-cream); }
+    .fox-toggle.active .fox-toggle-knob { left: 18px; background: var(--px-white); box-shadow: 0 0 0 2px var(--px-black); }
 
     .fox-range-row { display: flex; align-items: center; gap: 8px; }
     .fox-range-input { width: 64px; }
@@ -296,11 +301,11 @@ function getFoxStyles() {
     .fox-version { color: var(--fox-text-2); font-size: 12px; }
     .fox-about-link {
       display: inline-flex; align-items: center; gap: 4px;
-      color: var(--px-orange); font-size: 12px; text-decoration: none;
+      color: var(--fox-link); font-size: 12px; text-decoration: none;
       border-bottom: 2px solid transparent;
       align-self: flex-start;
     }
-    .fox-about-link:hover { border-bottom: 2px dotted var(--px-orange); }
+    .fox-about-link:hover { border-bottom: 2px dotted var(--fox-link); }
 
     /* ==========================================
        Edit panel
@@ -308,9 +313,9 @@ function getFoxStyles() {
     .fox-edit-body { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; padding: 10px 8px 16px; overflow-y: auto; }
     .fox-actions-list {
       display: flex; flex-direction: column;
-      background: var(--fox-inset);
+      background: var(--fox-surface);
       border: 2px solid var(--px-black);
-      box-shadow: inset 2px 2px 0 var(--px-stone);
+      box-shadow: inset 2px 2px 0 var(--fox-bevel-lo);
       padding: 2px 2px 2px 4px;
     }
     .fox-action-item { display: flex; align-items: center; gap: 6px; padding: 4px 0; }
@@ -342,14 +347,14 @@ function getFoxStyles() {
     .fox-insp-current {
       display: flex; flex-direction: column; gap: 4px;
       padding: 8px;
-      background: var(--fox-inset);
+      background: var(--fox-surface);
       border: 2px solid var(--px-black);
-      box-shadow: inset 2px 2px 0 var(--px-stone);
+      box-shadow: inset 2px 2px 0 var(--fox-bevel-lo);
     }
     .fox-insp-coords { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 700; }
-    .fox-insp-icon { color: var(--px-orange); }
+    .fox-insp-icon { color: var(--fox-link); }
     .fox-insp-element { font: 12px var(--fox-font-mono); }
-    .fox-insp-tag { color: var(--px-orange); }
+    .fox-insp-tag { color: var(--fox-link); }
     .fox-insp-id { color: var(--fox-text-2); }
     .fox-insp-empty { color: var(--fox-text-2); font-size: 12px; }
     .fox-snap-header { display: flex; align-items: center; justify-content: space-between; min-height: 24px; }
@@ -428,7 +433,7 @@ function getFoxStyles() {
     .fox-toast.visible { opacity: 1; transform: translate(-50%, 0); }
     .fox-toast.success { --type: var(--px-green); }
     .fox-toast.error { --type: var(--px-red); }
-    .fox-toast-icon { display: flex; color: var(--type); }
+    .fox-toast-icon { display: flex; background: var(--type); color: var(--px-black); }
 
     /* ==========================================
        Minimal mode: control bar only
@@ -452,8 +457,8 @@ function getFoxStyles() {
        Scrollbars
        ========================================== */
     ::-webkit-scrollbar { width: 10px; height: 10px; }
-    ::-webkit-scrollbar-track { background: var(--px-black); }
-    ::-webkit-scrollbar-thumb { background: var(--fox-line); box-shadow: inset 2px 2px 0 var(--px-cream); }
+    ::-webkit-scrollbar-track { background: var(--px-silver); }
+    ::-webkit-scrollbar-thumb { background: var(--fox-line); box-shadow: inset 2px 2px 0 var(--px-white); }
     ::-webkit-scrollbar-button { display: none; }
 
     /* ==========================================
