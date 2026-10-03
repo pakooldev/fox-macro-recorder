@@ -41,7 +41,7 @@ function renderMode() {
   const hasMacros = !!q('#fox-macro-select').value;
 
   q('#fox-record-btn').disabled = isRecording || isPlaying;
-  q('#fox-stop-btn').disabled = !isRecording && !isPlaying;
+  q('#fox-stop-btn').disabled = !isRecording; // while playing, the Play slot turns into Stop
   q('#fox-macro-select').disabled = isPlaying || !hasMacros;
 
   const playBtn = q('#fox-play-btn');
@@ -110,7 +110,7 @@ async function loadPixelFont() {
   // Esc closes the secondary panels (only while focus is inside Fox, so page shortcuts are untouched)
   state.root.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
-    if (foxEditPanel) closeEditPanel();
+    if (foxEditPanel) requestCloseEditPanel();
     else if (foxInspectorPanel) closeInspectorPanel();
   });
   document.addEventListener('click', handleClick, true);
@@ -155,6 +155,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     } else if (panel.classList.contains('hidden')) {
       panel.classList.remove('hidden');
       hideFab();
+      clampIntoView(panel);
+    } else if (state.isRecording || state.isPlaying) {
+      minimizePanel(); // keep a visible REC/PLAY indicator (the FAB) while it runs
     } else {
       panel.classList.add('hidden');
     }

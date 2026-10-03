@@ -92,7 +92,7 @@ try {
   await check('edit: page text stays text; rename and change a delay', async () => {
     await page.click('[data-action="edit"]');
     await page.waitForSelector('#fox-edit-panel');
-    assert.equal((await page.textContent('.fox-action-text')).trim(), '<img src=x onerror="');
+    assert.equal((await page.textContent('.fox-action-text')).trim(), '<img src=x onerror="window.__xss=1">');
     await page.fill('.fox-delay-input[data-index="1"]', '100');
     await page.fill('#fox-edit-name', 'M1');
     await page.click('#fox-edit-save');
@@ -114,7 +114,7 @@ try {
     await page.fill('.fox-loop-input[data-field="loopDelay"]', '15000');
     await page.press('.fox-loop-input[data-field="loopDelay"]', 'Tab');
     await page.click('#fox-play-btn');
-    await page.waitForFunction(() => document.querySelector('#fox-macro-shadow-host').shadowRoot.querySelector('.fox-play-progress')?.textContent.startsWith('WAIT'), null, { timeout: 5000 });
+    await page.waitForFunction(() => document.querySelector('#fox-macro-shadow-host').shadowRoot.querySelector('.fox-play-progress')?.textContent.includes(' IN '), null, { timeout: 5000 });
     const t = Date.now();
     await page.click('#fox-play-btn');
     await page.waitForSelector('.fox-btn-play-main', { timeout: 2000 });
@@ -224,6 +224,52 @@ try {
     assert(edit2.x + edit2.width <= main.x, `edit overlaps main: ${edit2.x + edit2.width} > ${main.x}`);
     await page.click('#fox-edit-close');
     await page.click('#fox-inspector-close');
+  });
+
+  // ---- UX review 2, round 2 ----
+  await check('2.4: toasts hang under the main panel, same width', async () => {
+    await page.click('#fox-record-btn');
+    await page.click('#fox-stop-btn'); // "Nothing recorded"
+    const panel = await rect('#fox-panel');
+    await page.waitForSelector('.fox-toast.visible');
+    await page.waitForTimeout(200);
+    const toast = await rect('.fox-toast.visible');
+    assert(Math.abs(toast.x - panel.x) <= 1 && Math.abs(toast.width - panel.width) <= 1, JSON.stringify({ toast, panel }));
+    assert(toast.y >= panel.y + panel.height && toast.y - (panel.y + panel.height) < 20, JSON.stringify({ toast, panel }));
+  });
+
+  await check('M2/M3: hiding the panel mid-recording leaves the FAB at the panel corner', async () => {
+    const panel = await rect('#fox-panel');
+    await page.click('#fox-record-btn');
+    await clickIcon(page);
+    await page.waitForSelector('#fox-fab.visible.recording');
+    const fab = await rect('#fox-fab');
+    assert(Math.abs(fab.y - panel.y) <= 8 && fab.x + fab.width <= panel.x + panel.width + 8, JSON.stringify({ fab, panel }));
+    await page.click('#fox-fab');
+    await page.click('#fox-stop-btn');
+  });
+
+  await check('M1: with many macros the controls stay visible while the list scrolls', async () => {
+    await sw.evaluate(() => chrome.storage.local.get({ macros: [] }).then(({ macros }) => chrome.storage.local.set({
+      macros: [...macros, ...Array.from({ length: 12 }, (_, i) => ({ id: 'many' + i, name: 'Many ' + i, domain: 'localhost', actions: [{ x: 1, y: 1, timestamp: 0 }] }))]
+    })));
+    await page.waitForSelector('.fox-macro-card[data-id="many11"]');
+    await page.locator('.fox-macro-card[data-id="many11"]').scrollIntoViewIfNeeded();
+    const rec = await rect('#fox-record-btn');
+    const panel = await rect('#fox-panel');
+    assert(rec && rec.y > panel.y && rec.y < panel.y + 100, `record button at ${rec?.y}`);
+    await sw.evaluate(() => chrome.storage.local.get({ macros: [] }).then(({ macros }) => chrome.storage.local.set({ macros: macros.filter(m => !m.id.startsWith('many')) })));
+    await page.waitForFunction(() => !document.querySelector('#fox-macro-shadow-host').shadowRoot.querySelector('[data-id="many0"]'));
+  });
+
+  await check('M6: the edit panel warns once before discarding changes', async () => {
+    await page.locator('[data-action="edit"]').first().click();
+    await page.fill('#fox-edit-name', 'changed');
+    await page.click('#fox-edit-close');
+    assert.equal(await page.locator('#fox-edit-panel').count(), 1);
+    assert.equal(await toastText(page), 'Unsaved changes: close again to discard');
+    await page.click('#fox-edit-close');
+    await page.waitForSelector('#fox-edit-panel', { state: 'detached' });
   });
 
   await check('B4: minimize, drag the FAB from its middle, then restore', async () => {

@@ -23,7 +23,7 @@ async function loadMacros() {
     ? allMacros
     : allMacros.filter(m => (m.domain || '') === selectedDomain);
 
-  updateMacroSelect(macros);
+  updateMacroSelect(macros, selectedDomain === '__all__');
 
   if (macros.length === 0) {
     list.innerHTML = html`
@@ -50,12 +50,13 @@ function renderMacroCard(m) {
   if (deleteConfirmMacroId === m.id) {
     return html`
       <div class="fox-macro-card confirm-delete" data-id="${m.id}">
+        <div class="fox-confirm-question">Delete this macro?</div>
         <div class="fox-macro-row">
-          <span class="fox-macro-name">Delete "${m.name}"?</span>
-        </div>
-        <div class="fox-delete-confirm">
-          <button class="fox-btn-cancel-delete" data-action="cancel-delete">Cancel</button>
-          <button class="fox-btn-confirm-delete" data-action="confirm-delete">Confirm Delete</button>
+          <span class="fox-macro-name">${m.name}</span>
+          <div class="fox-delete-confirm">
+            <button class="fox-btn-cancel-delete" data-action="cancel-delete">Cancel</button>
+            <button class="fox-btn-confirm-delete" data-action="confirm-delete">Delete</button>
+          </div>
         </div>
       </div>
     `;
@@ -117,10 +118,11 @@ function bindMacroListEvents() {
   });
 }
 
-function updateMacroSelect(macros) {
+// The domain is only added to the label when the list mixes domains
+function updateMacroSelect(macros, showDomain) {
   const select = q('#fox-macro-select');
   select.innerHTML = macros.length > 0
-    ? html`${macros.map(m => html`<option value="${m.id}">${m.name}${m.domain ? ` (${m.domain})` : ''}</option>`)}`
+    ? html`${macros.map(m => html`<option value="${m.id}">${m.name}${showDomain && m.domain ? ` (${m.domain})` : ''}</option>`)}`
     : '<option value="">No macros</option>';
 }
 
@@ -162,6 +164,8 @@ async function saveMacro() {
 
   q('.fox-save-bar').classList.remove('visible');
   state.recordedActions = [];
-  loadMacros();
+  await loadMacros();
+  // show the new card: it was appended at the end of a possibly long list
+  q(`.fox-macro-card[data-id="${macro.id}"]`)?.scrollIntoView({ block: 'nearest' });
   showToast('Macro saved', 'success');
 }

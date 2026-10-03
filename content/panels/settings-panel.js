@@ -30,7 +30,8 @@ function renderSettingsTab() {
         <div class="fox-section-label">ABOUT</div>
         <div class="fox-about">
           <div class="fox-version">Fox Macro Recorder v${chrome.runtime.getManifest().version}</div>
-          <div class="fox-version">Show/hide: ${state.shortcut || 'no shortcut set'} · change at chrome://extensions/shortcuts</div>
+          <div class="fox-version">Show/hide: ${state.shortcut || 'no shortcut set'}</div>
+          <div class="fox-version">Change it at chrome://extensions/shortcuts</div>
           <div class="fox-about-links">
             <a class="fox-about-link" href="https://buymeacoffee.com/panat.siriwong" target="_blank" rel="noopener">${icon('coffee')} Buy me a coffee</a>
           </div>

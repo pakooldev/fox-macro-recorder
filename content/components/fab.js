@@ -16,10 +16,13 @@ function hideFab() {
   foxFab.classList.remove('visible');
 }
 
+// The fox shrinks into the panel's top-right corner, where the user was looking
 function minimizePanel() {
+  const r = state.panel.getBoundingClientRect();
   state.panel.classList.add('hidden');
   state.isPanelMinimized = true;
   foxFab.classList.add('visible');
+  moveTo(foxFab, r.right - foxFab.offsetWidth, r.top);
   renderMode();
 }
 

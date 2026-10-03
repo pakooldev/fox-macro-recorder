@@ -153,7 +153,7 @@ Raised box, cream fill, 6px shadow. Fixed top-right as today, draggable by the h
 
 Inset bar under the control bar, only visible while recording/playing.
 - Recording: 8px square red dot (blinking) + `REC` (black) in pixel font + click counter on the right.
-- Playing: blue square dot + `PLAY` + progress `2/3 · 4/10`; between loops shows `WAIT 3/5`.
+- Playing: blue square dot + `PLAY` + `LOOP 2/3 · STEP 4/10` (just `STEP 4/10` for one loop); during a loop delay `LOOP 3/3 IN 4s`, counting down. While playing, the Play slot is the Stop button and the control-bar Stop is disabled (it stops recordings).
 
 ### 3.4 Save bar
 
@@ -167,7 +167,7 @@ Appears after a recording stops. Two inset inputs (name, domain), a silver "Disc
   - Row 1: name (UI font, 14px, black, ellipsis) + meta `5 · 3.2s` (pixel 13px, stone).
   - Row 2: actions Play (blue) / Edit (silver) / Delete (silver, red on hover) as 32px icon buttons; loop count and loop delay as small inset number inputs, each with a 24px icon (repeat, clock) instead of today's emoji.
   - Playing card: border turns blue and its Play button shows Stop.
-  - **Delete confirm:** peach fill with a red border, black text, text `DELETE "name"?`, buttons CANCEL (silver) / DELETE (red). Auto-cancels after 5s (current behavior).
+  - **Delete confirm:** `DELETE THIS MACRO?` on its own line, then the name (ellipsis) beside Cancel / Delete; peach fill with a red border, black text, text `DELETE "name"?`, buttons CANCEL (silver) / DELETE (red). Auto-cancels after 5s (current behavior).
 - **Empty state:** sleeping mascot (2×, `.fox-mascot-2x`) centered, `NO MACROS YET` in pixel 14px, hint `Press ● to record` in stone (`--fox-text-2`).
 
 ### 3.6 Settings tab
@@ -191,13 +191,13 @@ Silver title bar like the edit panel, crosshair icon. Below the readout, a note 
 
 ### 3.9 FAB (`#fox-fab`)
 
-Shown while the panel is minimized. 68px raised square (orange fill), mascot sprite at 1× (58px frame). The mascot's pose is the state indicator:
-- idle → `idle` loop (blink), recording → `record` loop + red border, playing → `play` loop + blue border.
-Draggable as today.
+Shown while the panel is minimized, appearing at the panel's top-right corner (the fox "shrinks into" where the panel was). Hiding the panel (icon/shortcut) while recording or playing minimizes it instead, so the REC/PLAY state stays visible. 68px raised square (orange fill), mascot sprite at 1× (58px frame). The mascot's pose is the state indicator:
+- idle → `idle` loop (blink), recording → `record` loop + red outline, playing → `play` loop + blue outline.
+Draggable from anywhere on it.
 
 ### 3.10 Toast
 
-Bottom-center, cream fill, black text, border color by type (green success / blue info / red error), 24px black icon on a square of the type color + pixel 14px message. Slides up 8px in `--fox-step`. (The mascot `success` frame is in the sheet but not used in toasts: at 58px it made the toast too tall.)
+Docked to the main panel, where the user is looking (not the page): same width, hanging 6px under its bottom edge; if there is no room, above its top edge; if the panel is as tall as the window, inside its bottom edge (8px inset). While minimized it sits by the FAB; with nothing visible, top centre. Cream fill, black text, border colour by type (green success / blue info / red error), 24px black icon on a square of the type colour + pixel 14px message (ellipsis). Slides 8px out from behind the panel edge in 120ms steps(3); no fading. `role="status"` (`alert` for errors).
 
 ### 3.11 Click feedback (drawn on the page, outside the shadow root)
 

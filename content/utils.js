@@ -232,6 +232,8 @@ function showTargetOutline(element) {
 }
 
 function switchTab(tabName) {
+  // Keep the panel's height when leaving Home, so the window (and its shadow) doesn't jump
+  state.panel.style.minHeight = tabName === 'home' ? '' : `${state.panel.offsetHeight}px`;
   state.activeTab = tabName;
   qa('.fox-tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tabName));
   qa('.fox-tab-content').forEach(content => content.classList.toggle('active', content.dataset.tab === tabName));

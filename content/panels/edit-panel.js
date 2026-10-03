@@ -1,9 +1,22 @@
 // Fox Macro Recorder - Edit Panel (Standalone Floating Panel)
 
 let foxEditPanel = null;
+let editDirty = false;          // unsaved changes in the open edit panel
+let editDiscardArmed = false;   // the user was warned once; the next close discards
+
+// Close button / Esc / opening another macro: warn once before throwing edits away
+function requestCloseEditPanel() {
+  if (editDirty && !editDiscardArmed) {
+    editDiscardArmed = true;
+    showToast('Unsaved changes: close again to discard', 'error', 3000);
+    return false;
+  }
+  closeEditPanel();
+  return true;
+}
 
 async function openEditPanel(id) {
-  closeEditPanel();
+  if (foxEditPanel && !requestCloseEditPanel()) return;
 
   const macro = await getMacro(id);
   if (!macro) {
@@ -15,7 +28,7 @@ async function openEditPanel(id) {
   panel.id = 'fox-edit-panel';
   panel.innerHTML = html`
     <div class="fox-edit-panel-header">
-      <div class="fox-edit-panel-title">${icon('edit')} Edit: ${macro.name}</div>
+      <div class="fox-edit-panel-title">${icon('edit')}<span>Edit:</span><span class="fox-edit-title-name">${macro.name}</span></div>
       <div class="fox-edit-panel-actions">
         <button class="fox-edit-save-btn" id="fox-edit-save">${icon('check')} Save</button>
         <button class="fox-icon-btn" id="fox-edit-close" title="Close">${icon('close')}</button>
@@ -28,7 +41,7 @@ async function openEditPanel(id) {
       <div class="fox-actions-list">${macro.actions.map((action, index) => html`
         <div class="fox-action-item">
           <div class="fox-action-num">${index + 1}</div>
-          <div class="fox-action-text" title="${action.text || 'Click'}">${action.text ? action.text.slice(0, 20) : 'Click'}</div>
+          <div class="fox-action-text" title="${action.text || 'Click'}">${action.text || 'Click'}</div>
           <div class="fox-action-coords">
             <input type="number" class="fox-coord-input fox-x-input" data-index="${index}" value="${Math.round(action.x)}" min="0" title="X" aria-label="Step ${index + 1} X">
             <span>,</span>
@@ -39,7 +52,7 @@ async function openEditPanel(id) {
               <span>+</span>
               <input type="number" class="fox-delay-input" data-index="${index}" value="${action.timestamp - macro.actions[index - 1].timestamp}" min="0" title="Delay (ms)" aria-label="Step ${index + 1} delay (ms)">
             </div>
-          ` : ''}
+          ` : html`<div class="fox-delay-chip fox-delay-placeholder" aria-hidden="true"></div>`}
         </div>
       `)}</div>
     </div>
@@ -54,7 +67,13 @@ async function openEditPanel(id) {
 
   makeDraggable(panel, panel.querySelector('.fox-edit-panel-header'));
   setupEditPanelResize(panel);
-  panel.querySelector('#fox-edit-close').addEventListener('click', closeEditPanel);
+  panel.querySelector('#fox-edit-close').addEventListener('click', requestCloseEditPanel);
+  editDirty = editDiscardArmed = false;
+  panel.addEventListener('input', () => {
+    editDirty = true;
+    editDiscardArmed = false;
+    panel.classList.add('dirty');
+  });
 
   panel.querySelector('#fox-edit-save').addEventListener('click', async () => {
     const field = (cls, i) => panel.querySelector(`.${cls}[data-index="${i}"]`).value;
@@ -125,6 +144,7 @@ function setupEditPanelResize(panel) {
 }
 
 function closeEditPanel() {
+  editDirty = editDiscardArmed = false;
   foxEditPanel?.remove();
   foxEditPanel = null;
 }

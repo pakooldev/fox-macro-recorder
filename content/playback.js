@@ -21,6 +21,16 @@ function jitter() {
   return randomDelayMin + Math.floor(Math.random() * (randomDelayMax - randomDelayMin + 1));
 }
 
+// Loop delay with a visible seconds countdown, still cut short by Stop
+async function waitWithCountdown(ms, nextLabel) {
+  const end = Date.now() + ms;
+  const tick = () => setProgress(`${nextLabel} IN ${Math.ceil((end - Date.now()) / 1000)}s`);
+  tick();
+  const timer = setInterval(tick, 250);
+  await sleep(ms);
+  clearInterval(timer);
+}
+
 function setProgress(text) {
   const el = q('.fox-play-progress');
   if (el) el.textContent = text;
@@ -51,8 +61,7 @@ async function playMacro(id) {
     await playActions(macro.actions, loop, loopCount);
 
     if (loop < loopCount && loopDelay > 0 && !state.shouldStop) {
-      setProgress(`WAIT ${loop + 1}/${loopCount}`);
-      await sleep(loopDelay + jitter());
+      await waitWithCountdown(loopDelay + jitter(), `LOOP ${loop + 1}/${loopCount}`);
     }
   }
 
@@ -68,9 +77,8 @@ async function playActions(actions, currentLoop, totalLoops) {
   for (let i = 0; i < actions.length && !state.shouldStop; i++) {
     const delay = (i === 0 ? 500 : (actions[i].timestamp - actions[i - 1].timestamp) || 500) + jitter();
 
-    setProgress(totalLoops > 1
-      ? `${currentLoop}/${totalLoops} · ${i + 1}/${actions.length}`
-      : `${i + 1}/${actions.length}`);
+    const stepText = `STEP ${i + 1}/${actions.length}`;
+    setProgress(totalLoops > 1 ? `LOOP ${currentLoop}/${totalLoops} · ${stepText}` : stepText);
 
     await sleep(delay);
     if (!state.shouldStop) simulateClick(actions[i]);

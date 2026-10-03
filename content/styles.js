@@ -115,6 +115,9 @@ function getFoxStyles() {
 
     /* Tabs */
     .fox-tab-content { display: none; flex: 1; min-height: 0; overflow-y: auto; }
+    /* Home: the controls stay put, only the macro list scrolls */
+    .fox-tab-content[data-tab="home"] { overflow: hidden; }
+    .fox-tab-content[data-tab="home"] > :not(.fox-macros) { flex: none; }
     .fox-tab-content.active { display: flex; flex-direction: column; }
 
     /* ==========================================
@@ -223,7 +226,7 @@ function getFoxStyles() {
 
     .fox-domain-filter-bar { display: flex; padding: 0 8px 8px; }
 
-    .fox-macros { padding: 0 8px 8px; }
+    .fox-macros { flex: 1; min-height: 0; overflow-y: auto; padding: 0 8px 8px; }
 
     .fox-domain-group-header {
       display: flex; align-items: center; gap: 8px;
@@ -258,7 +261,8 @@ function getFoxStyles() {
     .fox-loop-item { display: flex; align-items: center; gap: 2px; color: var(--fox-text-2); }
     .fox-loop-input { width: 56px; }
 
-    .fox-delete-confirm { display: flex; justify-content: flex-end; gap: 8px; }
+    .fox-confirm-question { font-size: 14px; letter-spacing: 1px; text-transform: uppercase; }
+    .fox-delete-confirm { display: flex; flex: none; gap: 8px; }
 
     .fox-empty {
       display: flex; flex-direction: column; align-items: center; gap: 6px;
@@ -317,7 +321,10 @@ function getFoxStyles() {
     /* ==========================================
        Edit panel
        ========================================== */
-    .fox-edit-body { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; padding: 10px 8px 16px; overflow-y: auto; }
+    .fox-edit-body { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; padding: 10px 8px 22px; overflow-y: auto; }
+    /* the macro name is user content: system font, as typed, ellipsis */
+    .fox-edit-title-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; font: 14px var(--fox-font-ui); text-transform: none; }
+    #fox-edit-panel.dirty .fox-edit-title-name::before { content: '* '; } /* before: a long name is cut at the end */
     .fox-actions-list {
       display: flex; flex-direction: column;
       background: var(--fox-surface);
@@ -336,6 +343,8 @@ function getFoxStyles() {
     .fox-action-text { flex: 1; min-width: 0; font: 13px var(--fox-font-ui); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .fox-action-coords, .fox-delay-chip { display: flex; align-items: center; gap: 2px; color: var(--fox-text-2); font-size: 14px; }
     .fox-coord-input, .fox-delay-input { width: 48px; height: 28px; padding: 0 4px; }
+    /* fixed width so step 1 (no delay, empty placeholder) lines up with the rest */
+    .fox-delay-chip { width: 60px; flex: none; justify-content: flex-end; }
 
     .fox-resize-grip { position: absolute; bottom: 4px; width: 12px; height: 12px; }
     .fox-resize-grip::before {
@@ -422,8 +431,10 @@ function getFoxStyles() {
        ========================================== */
     .fox-toast {
       --type: var(--px-blue);
-      position: fixed; bottom: 24px; left: 50%;
+      position: fixed; top: 0; left: 0; /* placed by placeToast() */
       display: flex; align-items: center; gap: 8px;
+      box-sizing: border-box;
+      min-width: 200px;
       max-width: 380px;
       padding: 6px 12px 6px 8px;
       background: var(--fox-bg);
@@ -432,14 +443,16 @@ function getFoxStyles() {
       box-shadow: 4px 4px 0 var(--px-black);
       font: 14px var(--fox-font-pixel);
       letter-spacing: 1px;
-      white-space: nowrap;
       cursor: pointer;
-      opacity: 0;
-      transform: translate(-50%, 8px);
-      transition: opacity var(--fox-step), transform var(--fox-step);
+      /* slides out from behind the panel edge; no fading (no see-through surfaces) */
+      visibility: hidden;
+      transform: translateY(-8px);
+      transition: transform 120ms steps(3), visibility 0s 120ms;
       z-index: 2147483647;
     }
-    .fox-toast.visible { opacity: 1; transform: translate(-50%, 0); }
+    .fox-toast.from-above { transform: translateY(8px); }
+    .fox-toast.visible { visibility: visible; transform: none; transition: transform 120ms steps(3); }
+    .fox-toast-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .fox-toast.success { --type: var(--px-green); }
     .fox-toast.error { --type: var(--px-red); }
     .fox-toast-icon { display: flex; background: var(--type); color: var(--px-black); }
@@ -448,6 +461,7 @@ function getFoxStyles() {
        Minimal mode: control bar only
        ========================================== */
     #fox-panel.minimal-mode { width: auto; min-width: 0; }
+    #fox-panel:is(.minimal-mode, .recording-mode) { min-height: 0 !important; }
     #fox-panel.minimal-mode :is(.fox-tabs, .fox-save-bar, .fox-domain-filter-bar, .fox-macros, .fox-status-strip),
     #fox-panel.minimal-mode .fox-tab-content[data-tab="settings"] { display: none !important; }
     #fox-panel.minimal-mode .fox-tab-content[data-tab="home"] { display: flex; }
