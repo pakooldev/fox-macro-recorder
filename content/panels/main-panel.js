@@ -1,11 +1,9 @@
 // Fox Macro Recorder - Unified Panel with Tab-Based Layout
 
 function createPanel() {
-  if (foxPanel) return;
-
-  foxPanel = document.createElement('div');
-  foxPanel.id = 'fox-panel';
-  foxPanel.innerHTML = `
+  const panel = document.createElement('div');
+  panel.id = 'fox-panel';
+  panel.innerHTML = `
     <div class="fox-header">
       <div class="fox-header-left">
         <span class="fox-logo">\uD83E\uDD8A</span>
@@ -57,101 +55,45 @@ function createPanel() {
     </div>
   `;
 
-  // Hide by default
-  foxPanel.classList.add('hidden');
+  panel.classList.add('hidden');
+  state.root.appendChild(panel);
+  state.panel = panel;
 
-  // Add to shadow root
-  foxShadowRoot.appendChild(foxPanel);
-
-  // Make draggable
-  makeDraggable(foxPanel, foxPanel.querySelector('.fox-header'));
-
-  // Bind events
+  makeDraggable(panel, panel.querySelector('.fox-header'));
   bindPanelEvents();
-
-  // Load settings
-  loadRandomDelaySetting();
-
-  // Load macros
   loadMacros();
-
-  // Render settings tab
   renderSettingsTab();
 }
 
 function bindPanelEvents() {
-  const recordBtn = foxShadowRoot.querySelector('#fox-record-btn');
-  const stopBtn = foxShadowRoot.querySelector('#fox-stop-btn');
-  const saveBtn = foxShadowRoot.querySelector('#fox-save-btn');
-  const saveInput = foxShadowRoot.querySelector('#fox-save-input');
-  const playBtn = foxShadowRoot.querySelector('#fox-play-btn');
-  const macroSelect = foxShadowRoot.querySelector('#fox-macro-select');
-  const minimizeBtn = foxShadowRoot.querySelector('#fox-minimize-btn');
-  const closeBtn = foxShadowRoot.querySelector('#fox-close-btn');
+  const macroSelect = q('#fox-macro-select');
+  const minimalBtn = q('#fox-minimal-btn');
 
-  // Tab switching
-  foxShadowRoot.querySelectorAll('.fox-tab-btn[data-tab]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      switchTab(btn.dataset.tab);
-    });
+  qa('.fox-tab-btn[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
   });
+  q('#fox-inspector-toggle').addEventListener('click', toggleInspectorPanel);
 
-  // Inspector toggle (opens floating panel)
-  foxShadowRoot.querySelector('#fox-inspector-toggle').addEventListener('click', toggleInspectorPanel);
-
-  // Record
-  recordBtn.addEventListener('click', startRecording);
-
-  // Stop
-  stopBtn.addEventListener('click', () => {
-    if (isRecording) stopRecording();
-    if (isPlaying) shouldStopPlayback = true;
+  q('#fox-record-btn').addEventListener('click', startRecording);
+  q('#fox-stop-btn').addEventListener('click', () => {
+    if (state.isRecording) stopRecording();
+    if (state.isPlaying) state.shouldStop = true;
   });
+  q('#fox-play-btn').addEventListener('click', () => togglePlayback(macroSelect.value));
 
-  // Save
-  saveBtn.addEventListener('click', saveMacro);
-
-  // Enter key saves
-  saveInput.addEventListener('keydown', (e) => {
+  q('#fox-save-btn').addEventListener('click', saveMacro);
+  q('#fox-save-input').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') saveMacro();
   });
 
-  // Play from dropdown
-  playBtn.addEventListener('click', async () => {
-    if (isPlaying) {
-      shouldStopPlayback = true;
-    } else {
-      const selectedId = macroSelect.value;
-      if (selectedId) {
-        await playMacro(selectedId, null);
-      }
-    }
-  });
+  q('#fox-domain-filter').addEventListener('change', loadMacros);
+  bindMacroListEvents();
 
-  // Domain filter
-  const domainFilter = foxShadowRoot.querySelector('#fox-domain-filter');
-  domainFilter.addEventListener('change', () => loadMacros());
-
-  // Minimal mode toggle
-  const minimalBtn = foxShadowRoot.querySelector('#fox-minimal-btn');
   minimalBtn.addEventListener('click', () => {
-    foxPanel.classList.toggle('minimal-mode');
-    minimalBtn.textContent = foxPanel.classList.contains('minimal-mode') ? '\u25A1' : '\u25A0';
-    minimalBtn.title = foxPanel.classList.contains('minimal-mode') ? 'Full mode' : 'Minimal mode';
+    const minimal = state.panel.classList.toggle('minimal-mode');
+    minimalBtn.textContent = minimal ? '\u25A1' : '\u25A0';
+    minimalBtn.title = minimal ? 'Full mode' : 'Minimal mode';
   });
-
-  // Minimize
-  minimizeBtn.addEventListener('click', minimizePanel);
-
-  // Close
-  closeBtn.addEventListener('click', () => {
-    foxPanel.classList.add('hidden');
-  });
-}
-
-async function loadRandomDelaySetting() {
-  const result = await chrome.storage.local.get(['randomDelayEnabled', 'randomDelayMin', 'randomDelayMax']);
-  isRandomDelayEnabled = result.randomDelayEnabled || false;
-  randomDelayMin = result.randomDelayMin || 100;
-  randomDelayMax = result.randomDelayMax || 500;
+  q('#fox-minimize-btn').addEventListener('click', minimizePanel);
+  q('#fox-close-btn').addEventListener('click', () => state.panel.classList.add('hidden'));
 }

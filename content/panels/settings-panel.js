@@ -1,26 +1,26 @@
 // Fox Macro Recorder - Settings Tab
 
 function renderSettingsTab() {
-  const container = foxShadowRoot?.querySelector('#fox-settings-content');
-  if (!container) return;
+  const container = q('#fox-settings-content');
+  const s = state.settings;
 
-  container.innerHTML = `
+  container.innerHTML = html`
     <div class="fox-settings-body">
       <div class="fox-settings-group">
         <div class="fox-section-label">PLAYBACK</div>
         <div class="fox-settings-row">
           <div class="fox-settings-label">
-            <span class="fox-settings-icon">\uD83C\uDFB2</span>
+            <span class="fox-settings-icon">🎲</span>
             <span>Random Delay</span>
           </div>
-          <div class="fox-toggle${isRandomDelayEnabled ? ' active' : ''}" id="fox-random-delay-toggle" title="Add random delays between clicks">
+          <div class="fox-toggle${s.randomDelayEnabled ? ' active' : ''}" id="fox-random-delay-toggle" title="Add random delays between clicks">
             <div class="fox-toggle-knob"></div>
           </div>
         </div>
         <div class="fox-range-row" title="Min and max delay range (ms)">
-          <input type="number" id="fox-delay-min" class="fox-range-input" value="${randomDelayMin}" min="0" max="10000">
-          <span class="fox-range-sep">\u2014</span>
-          <input type="number" id="fox-delay-max" class="fox-range-input" value="${randomDelayMax}" min="0" max="10000">
+          <input type="number" id="fox-delay-min" class="fox-range-input" value="${s.randomDelayMin}" min="0" max="10000">
+          <span class="fox-range-sep">—</span>
+          <input type="number" id="fox-delay-max" class="fox-range-input" value="${s.randomDelayMax}" min="0" max="10000">
           <span class="fox-range-unit">ms</span>
         </div>
       </div>
@@ -28,7 +28,7 @@ function renderSettingsTab() {
       <div class="fox-settings-group">
         <div class="fox-section-label">ABOUT</div>
         <div class="fox-about">
-          <div class="fox-version">Fox Macro Recorder v2.0.0</div>
+          <div class="fox-version">Fox Macro Recorder v${chrome.runtime.getManifest().version}</div>
           <div class="fox-about-links">
             <a class="fox-about-link" href="https://buymeacoffee.com/panat.siriwong" target="_blank">Buy Me a Coffee</a>
           </div>
@@ -37,30 +37,28 @@ function renderSettingsTab() {
     </div>
   `;
 
-  // Random delay toggle
+  const set = (key, value) => {
+    s[key] = value;
+    return saveSetting(key, value);
+  };
+
   const toggle = container.querySelector('#fox-random-delay-toggle');
   toggle.addEventListener('click', async () => {
-    isRandomDelayEnabled = !isRandomDelayEnabled;
-    toggle.classList.toggle('active', isRandomDelayEnabled);
-    await chrome.storage.local.set({ randomDelayEnabled: isRandomDelayEnabled });
-    showToast('\u2713 Settings updated', 'success');
+    toggle.classList.toggle('active', !s.randomDelayEnabled);
+    await set('randomDelayEnabled', !s.randomDelayEnabled);
+    showToast('✓ Settings updated', 'success');
   });
 
-  // Min/max inputs
   const minInput = container.querySelector('#fox-delay-min');
   const maxInput = container.querySelector('#fox-delay-max');
 
-  minInput.addEventListener('change', async () => {
-    const value = parseInt(minInput.value) || 0;
-    randomDelayMin = Math.max(0, Math.min(value, randomDelayMax));
-    minInput.value = randomDelayMin;
-    await chrome.storage.local.set({ randomDelayMin });
+  minInput.addEventListener('change', () => {
+    minInput.value = Math.max(0, Math.min(parseInt(minInput.value) || 0, s.randomDelayMax));
+    set('randomDelayMin', Number(minInput.value));
   });
 
-  maxInput.addEventListener('change', async () => {
-    const value = parseInt(maxInput.value) || 0;
-    randomDelayMax = Math.max(randomDelayMin, value);
-    maxInput.value = randomDelayMax;
-    await chrome.storage.local.set({ randomDelayMax });
+  maxInput.addEventListener('change', () => {
+    maxInput.value = Math.max(s.randomDelayMin, parseInt(maxInput.value) || 0);
+    set('randomDelayMax', Number(maxInput.value));
   });
 }

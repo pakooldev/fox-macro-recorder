@@ -1,73 +1,117 @@
-// Fox Macro Recorder - Main Content Script (Entry Point)
-// Creates Shadow DOM, initializes global state, sets up event listeners
+// Fox Macro Recorder - Entry point (injected last, after every other content file)
+// Owns the shared state and the shadow root. renderMode() is the only place that
+// turns recording/playing state into UI.
+
+const state = {
+  root: null,              // shadow root holding all of our UI
+  panel: null,
+  isRecording: false,
+  isPlaying: false,
+  shouldStop: false,
+  playingId: null,         // id of the macro being played
+  recordingStartTime: 0,
+  recordedActions: [],
+  activeTab: 'home',
+  isPanelMinimized: false,
+  settings: { ...DEFAULT_SETTINGS }
+};
+
+function q(selector) {
+  return state.root.querySelector(selector);
+}
+
+function qa(selector) {
+  return state.root.querySelectorAll(selector);
+}
+
+function isOwnUi(target) {
+  return !!target.closest?.('#fox-macro-shadow-host');
+}
+
+function setPlayButton(btn, showStop, playClass, stopClass) {
+  btn.textContent = showStop ? '⏹' : '▶';
+  btn.className = showStop ? stopClass : playClass;
+  btn.title = showStop ? 'Stop' : 'Play';
+}
+
+function renderMode() {
+  const { isRecording, isPlaying } = state;
+  const hasMacros = !!q('#fox-macro-select').value;
+
+  q('#fox-record-btn').disabled = isRecording || isPlaying;
+  q('#fox-stop-btn').disabled = !isRecording && !isPlaying;
+  q('#fox-macro-select').disabled = isPlaying || !hasMacros;
+
+  const playBtn = q('#fox-play-btn');
+  setPlayButton(playBtn, isPlaying, 'fox-ctrl-btn fox-btn-play-main', 'fox-ctrl-btn fox-btn-stop-main');
+  playBtn.disabled = !isPlaying && !hasMacros;
+
+  qa('.fox-macro-card [data-action="play"]').forEach(btn => {
+    const playingThis = isPlaying && btn.closest('.fox-macro-card').dataset.id === state.playingId;
+    setPlayButton(btn, playingThis, 'fox-action-btn fox-abtn-play', 'fox-action-btn fox-abtn-stop');
+  });
+
+  const strip = q('.fox-status-strip');
+  if (isRecording) {
+    strip.className = 'fox-status-strip recording visible';
+    strip.innerHTML = html`
+      <div class="fox-status-left"><span class="fox-status-dot"></span><span>REC</span></div>
+      <span class="fox-rec-count">${state.recordedActions.length}</span>
+    `;
+  } else if (isPlaying) {
+    strip.className = 'fox-status-strip playing visible';
+    strip.innerHTML = html`
+      <div class="fox-status-left"><span class="fox-status-dot"></span><span>PLAY</span></div>
+      <span class="fox-play-progress"></span>
+    `;
+  } else {
+    strip.classList.remove('visible');
+  }
+
+  state.panel.classList.toggle('recording-mode', isRecording);
+  foxFab?.classList.toggle('recording', isRecording);
+  foxFab?.classList.toggle('playing', isPlaying && !isRecording);
+}
 
 // ==========================================
-// Global State
-// ==========================================
-let foxShadowRoot = null;
-let foxPanel = null;
-let isRecording = false;
-let isPlaying = false;
-let shouldStopPlayback = false;
-let recordingStartTime = null;
-let recordedActions = [];
-let activeTab = 'home';
-let isPanelMinimized = false;
-let isRandomDelayEnabled = false;
-let randomDelayMin = 100;
-let randomDelayMax = 500;
-
-// ==========================================
-// Shadow DOM Setup
+// Init
 // ==========================================
 (function initFoxMacroRecorder() {
-  // Create shadow host
   const shadowHost = document.createElement('div');
   shadowHost.id = 'fox-macro-shadow-host';
   shadowHost.style.cssText = 'all: initial; position: fixed; top: 0; left: 0; z-index: 2147483647; pointer-events: none;';
   document.body.appendChild(shadowHost);
 
-  // Attach shadow root (open mode for extension compatibility)
-  foxShadowRoot = shadowHost.attachShadow({ mode: 'open' });
+  state.root = shadowHost.attachShadow({ mode: 'open' });
 
-  // Allow pointer events on actual elements inside shadow root
-  const pointerStyle = document.createElement('style');
-  pointerStyle.textContent = ':host { pointer-events: none; } :host > * { pointer-events: auto; }';
-  foxShadowRoot.appendChild(pointerStyle);
+  const style = document.createElement('style');
+  style.textContent = ':host { pointer-events: none; } :host > * { pointer-events: auto; }' + getFoxStyles();
+  state.root.appendChild(style);
 
-  // Inject design system styles
-  const styleEl = document.createElement('style');
-  styleEl.textContent = getFoxStyles();
-  foxShadowRoot.appendChild(styleEl);
-
-  // Create panel
   createPanel();
-
-  // Create FAB
   createFab();
-
-  // Listen for clicks (recording)
   document.addEventListener('click', handleClick, true);
+
+  loadSettings().then(settings => {
+    state.settings = settings;
+    renderSettingsTab();
+  });
 })();
 
 // ==========================================
-// Message Listener (popup communication)
+// Popup messages
 // ==========================================
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  const panel = state.panel;
   if (message.action === 'togglePanel') {
-    if (foxPanel) {
-      if (foxPanel.classList.contains('hidden') && !isPanelMinimized) {
-        foxPanel.classList.remove('hidden');
-        hideFab();
-      } else if (isPanelMinimized) {
-        expandPanel();
-      } else {
-        foxPanel.classList.add('hidden');
-      }
-      sendResponse({ isHidden: foxPanel.classList.contains('hidden') });
+    if (state.isPanelMinimized) {
+      expandPanel();
+    } else if (panel.classList.contains('hidden')) {
+      panel.classList.remove('hidden');
+      hideFab();
+    } else {
+      panel.classList.add('hidden');
     }
-  } else if (message.action === 'getPanelState') {
-    sendResponse({ isHidden: foxPanel ? foxPanel.classList.contains('hidden') : false });
   }
-  return true;
+  sendResponse({ isHidden: panel.classList.contains('hidden') });
 });

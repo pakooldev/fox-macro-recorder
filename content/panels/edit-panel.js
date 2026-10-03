@@ -1,122 +1,80 @@
 // Fox Macro Recorder - Edit Panel (Standalone Floating Panel)
 
-let currentEditMacroId = null;
 let foxEditPanel = null;
 
-function openEditPanel(id) {
-  // Close existing edit panel if open
+async function openEditPanel(id) {
   closeEditPanel();
 
-  currentEditMacroId = id;
+  const macro = await getMacro(id);
+  if (!macro) {
+    showToast('Macro not found', 'error');
+    return;
+  }
 
-  // Load macro data then build panel
-  chrome.storage.local.get(['macros']).then(result => {
-    const macro = result.macros.find(m => m.id === id);
-    if (!macro) {
-      showToast('Macro not found', 'error');
-      return;
-    }
-
-    foxEditPanel = document.createElement('div');
-    foxEditPanel.id = 'fox-edit-panel';
-
-    // Build actions list
-    const actionsHTML = macro.actions.map((action, index) => {
-      const delay = index === 0 ? 0 : (action.timestamp - macro.actions[index - 1].timestamp);
-      const text = action.text ? action.text.slice(0, 20) : 'Click';
-      return `
+  const panel = document.createElement('div');
+  panel.id = 'fox-edit-panel';
+  panel.innerHTML = html`
+    <div class="fox-edit-panel-header">
+      <div class="fox-edit-panel-title">\u270F\uFE0F Edit: ${macro.name}</div>
+      <div class="fox-edit-panel-actions">
+        <button class="fox-edit-save-btn" id="fox-edit-save">\u2713 Save</button>
+        <button class="fox-icon-btn" id="fox-edit-close" title="Close">\u00D7</button>
+      </div>
+    </div>
+    <div class="fox-edit-body">
+      <input type="text" class="fox-edit-name" id="fox-edit-name" value="${macro.name}" placeholder="Macro name">
+      <input type="text" class="fox-edit-domain" id="fox-edit-domain" value="${macro.domain || ''}" placeholder="Domain (e.g. example.com)">
+      <div class="fox-section-label">ACTIONS (${macro.actions.length})</div>
+      <div class="fox-actions-list">${macro.actions.map((action, index) => html`
         <div class="fox-action-item">
           <div class="fox-action-num">${index + 1}</div>
-          <div class="fox-action-text" title="${action.text || 'Click'}">${text}</div>
+          <div class="fox-action-text" title="${action.text || 'Click'}">${action.text ? action.text.slice(0, 20) : 'Click'}</div>
           <div class="fox-action-coords">
             <input type="number" class="fox-coord-input fox-x-input" data-index="${index}" value="${Math.round(action.x)}" min="0" title="X">
             <span>,</span>
             <input type="number" class="fox-coord-input fox-y-input" data-index="${index}" value="${Math.round(action.y)}" min="0" title="Y">
           </div>
-          ${index > 0 ? `
+          ${index > 0 ? html`
             <div class="fox-delay-chip">
               <span>+</span>
-              <input type="number" class="fox-delay-input" data-index="${index}" value="${delay}" min="0" title="Delay (ms)">
+              <input type="number" class="fox-delay-input" data-index="${index}" value="${action.timestamp - macro.actions[index - 1].timestamp}" min="0" title="Delay (ms)">
             </div>
           ` : ''}
         </div>
-      `;
-    }).join('');
+      `)}</div>
+    </div>
+    <div class="fox-resize-grip fox-resize-grip-bl" data-grip="bl"></div>
+    <div class="fox-resize-grip fox-resize-grip-br" data-grip="br"></div>
+  `;
 
-    foxEditPanel.innerHTML = `
-      <div class="fox-edit-panel-header">
-        <div class="fox-edit-panel-title">\u270F\uFE0F Edit: ${macro.name}</div>
-        <div class="fox-edit-panel-actions">
-          <button class="fox-edit-save-btn" id="fox-edit-save">\u2713 Save</button>
-          <button class="fox-icon-btn" id="fox-edit-close" title="Close">\u00D7</button>
-        </div>
-      </div>
-      <div class="fox-edit-body">
-        <input type="text" class="fox-edit-name" id="fox-edit-name" value="${macro.name}" placeholder="Macro name">
-        <input type="text" class="fox-edit-domain" id="fox-edit-domain" value="${macro.domain || ''}" placeholder="Domain (e.g. example.com)">
-        <div class="fox-section-label">ACTIONS (${macro.actions.length})</div>
-        <div class="fox-actions-list">${actionsHTML}</div>
-      </div>
-      <div class="fox-resize-grip fox-resize-grip-bl" data-grip="bl"></div>
-      <div class="fox-resize-grip fox-resize-grip-br" data-grip="br"></div>
-    `;
+  state.root.appendChild(panel);
+  foxEditPanel = panel;
 
-    foxShadowRoot.appendChild(foxEditPanel);
+  makeDraggable(panel, panel.querySelector('.fox-edit-panel-header'));
+  setupEditPanelResize(panel);
+  panel.querySelector('#fox-edit-close').addEventListener('click', closeEditPanel);
 
-    // Make draggable by header
-    makeDraggable(foxEditPanel, foxEditPanel.querySelector('.fox-edit-panel-header'));
+  panel.querySelector('#fox-edit-save').addEventListener('click', async () => {
+    const field = (cls, i) => panel.querySelector(`.${cls}[data-index="${i}"]`).value;
+    const name = panel.querySelector('#fox-edit-name').value.trim() || macro.name;
+    const domain = panel.querySelector('#fox-edit-domain').value.trim();
 
-    // Resize via corner grip
-    setupEditPanelResize(foxEditPanel);
-
-    // Close button
-    foxEditPanel.querySelector('#fox-edit-close').addEventListener('click', closeEditPanel);
-
-    // Save
-    foxEditPanel.querySelector('#fox-edit-save').addEventListener('click', async () => {
-      const newName = foxEditPanel.querySelector('#fox-edit-name').value.trim() || macro.name;
-      const newDomain = foxEditPanel.querySelector('#fox-edit-domain').value.trim();
-
-      const updatedActions = [...macro.actions];
-      const xInputs = foxEditPanel.querySelectorAll('.fox-x-input[data-index]');
-      const yInputs = foxEditPanel.querySelectorAll('.fox-y-input[data-index]');
-      const delayInputs = foxEditPanel.querySelectorAll('.fox-delay-input[data-index]');
-
-      // Update positions
-      xInputs.forEach(input => {
-        updatedActions[parseInt(input.dataset.index)].x = parseFloat(input.value) || 0;
-      });
-      yInputs.forEach(input => {
-        updatedActions[parseInt(input.dataset.index)].y = parseFloat(input.value) || 0;
-      });
-
-      // Update delays
-      delayInputs.forEach(input => {
-        const index = parseInt(input.dataset.index);
-        const newDelay = parseInt(input.value) || 0;
-        if (index > 0) {
-          updatedActions[index].timestamp = updatedActions[index - 1].timestamp + newDelay;
-          for (let i = index + 1; i < updatedActions.length; i++) {
-            const originalDelay = macro.actions[i].timestamp - macro.actions[i - 1].timestamp;
-            updatedActions[i].timestamp = updatedActions[i - 1].timestamp + originalDelay;
-          }
-        }
-      });
-
-      // Save
-      const saveResult = await chrome.storage.local.get(['macros']);
-      const macros = saveResult.macros || [];
-      const macroIndex = macros.findIndex(m => m.id === id);
-
-      if (macroIndex !== -1) {
-        macros[macroIndex] = { ...macro, name: newName, domain: newDomain, actions: updatedActions };
-        await chrome.storage.local.set({ macros });
-        loadMacros();
-        showToast('\u2713 Macro updated', 'success');
-      }
-
-      closeEditPanel();
+    // Each action's timestamp = previous timestamp + its delay input
+    let timestamp = 0;
+    const actions = macro.actions.map((action, i) => {
+      timestamp = i === 0 ? action.timestamp : timestamp + (parseInt(field('fox-delay-input', i)) || 0);
+      return {
+        ...action,
+        x: parseFloat(field('fox-x-input', i)) || 0,
+        y: parseFloat(field('fox-y-input', i)) || 0,
+        timestamp
+      };
     });
+
+    await updateMacros(macros => macros.map(m => m.id === id ? { ...m, name, domain, actions } : m));
+    loadMacros();
+    showToast('\u2713 Macro updated', 'success');
+    closeEditPanel();
   });
 }
 
@@ -165,9 +123,6 @@ function setupEditPanelResize(panel) {
 }
 
 function closeEditPanel() {
-  if (foxEditPanel) {
-    foxEditPanel.remove();
-    foxEditPanel = null;
-    currentEditMacroId = null;
-  }
+  foxEditPanel?.remove();
+  foxEditPanel = null;
 }

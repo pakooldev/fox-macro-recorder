@@ -1,39 +1,95 @@
 // Fox Macro Recorder - Utility Functions
 
-// Helper to format duration
+// ==========================================
+// Safe HTML
+// ==========================================
+// Every innerHTML in the extension goes through html`...`: interpolated values are
+// escaped unless they are themselves html`...` results (or arrays of them).
+// Macro names and recorded page text come from web pages / imported files, so never
+// build markup with plain template strings.
+class SafeHtml {
+  constructor(value) { this.value = value; }
+  toString() { return this.value; }
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+function toHtml(value) {
+  if (value instanceof SafeHtml) return value.value;
+  if (Array.isArray(value)) return value.map(toHtml).join('');
+  return escapeHtml(value);
+}
+
+function html(strings, ...values) {
+  return new SafeHtml(strings.reduce((out, str, i) => out + str + (i < values.length ? toHtml(values[i]) : ''), ''));
+}
+
+// ==========================================
+// Formatting
+// ==========================================
 function formatDuration(ms) {
   if (ms < 1000) return `${ms}ms`;
   return `${(ms / 1000).toFixed(1)}s`;
 }
 
-// Format macro info for compact display
 function formatMacroInfo(clicks, durationMs) {
-  return `${clicks} \u00B7 ${formatDuration(durationMs)}`;
+  return `${clicks} · ${formatDuration(durationMs)}`;
 }
 
-// Make an element draggable by its handle
-function makeDraggable(element, handle) {
-  let offsetX, offsetY, isDragging = false;
+// Named domains alphabetically, '' (ungrouped) last
+function compareDomains(a, b) {
+  if (!a) return 1;
+  if (!b) return -1;
+  return a.localeCompare(b);
+}
+
+// ==========================================
+// Dragging
+// ==========================================
+// Drags `element` by `handle`. A click right after a drag is swallowed, so a
+// draggable button (the FAB) doesn't fire when it is dropped.
+function makeDraggable(element, handle = element) {
+  let start = null, offsetX = 0, offsetY = 0, dragged = false;
 
   handle.addEventListener('mousedown', (e) => {
-    if (e.target.closest('button') || e.target.closest('input') || e.target.closest('select')) return;
-    isDragging = true;
-    offsetX = e.clientX - element.offsetLeft;
-    offsetY = e.clientY - element.offsetTop;
+    dragged = false;
+    if (e.target !== handle && e.target.closest('button, input, select')) return;
+    const rect = element.getBoundingClientRect();
+    start = { x: e.clientX, y: e.clientY };
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
     e.preventDefault();
   });
 
   document.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
-    element.style.left = (e.clientX - offsetX) + 'px';
-    element.style.top = (e.clientY - offsetY) + 'px';
-    element.style.right = 'auto';
+    if (!start) return;
+    if (Math.abs(e.clientX - start.x) > 3 || Math.abs(e.clientY - start.y) > 3) dragged = true;
+    Object.assign(element.style, {
+      left: `${e.clientX - offsetX}px`,
+      top: `${e.clientY - offsetY}px`,
+      right: 'auto',
+      bottom: 'auto'
+    });
   });
 
-  document.addEventListener('mouseup', () => { isDragging = false; });
+  document.addEventListener('mouseup', () => { start = null; });
+
+  element.addEventListener('click', (e) => {
+    if (dragged) {
+      e.stopImmediatePropagation();
+      dragged = false;
+    }
+  }, true);
 }
 
-// Generate a unique CSS selector for an element
+// ==========================================
+// Page helpers
+// ==========================================
+// Generate a unique CSS selector for an element (recorded with each click)
 function getSelector(element) {
   if (element.id) return `#${element.id}`;
   if (element.tagName === 'BODY') return 'body';
@@ -77,7 +133,6 @@ function getSelector(element) {
 
 // Show visual feedback for clicks (rendered OUTSIDE shadow root for correct positioning)
 function showClickFeedback(x, y, color, isPlayback = false) {
-  // Inject animation keyframes into page if not present
   if (!document.getElementById('fox-click-feedback-styles')) {
     const style = document.createElement('style');
     style.id = 'fox-click-feedback-styles';
@@ -95,56 +150,27 @@ function showClickFeedback(x, y, color, isPlayback = false) {
     document.head.appendChild(style);
   }
 
-  if (isPlayback) {
-    // Ripple effect
-    const ripple = document.createElement('div');
-    ripple.style.cssText = `
-      position: fixed; left: ${x - 30}px; top: ${y - 30}px;
-      width: 60px; height: 60px; border: 4px solid ${color};
-      border-radius: 50%; pointer-events: none; z-index: 2147483646;
-      animation: foxClickRipple 0.8s ease-out forwards;
+  const spawn = (size, css, duration) => {
+    const el = document.createElement('div');
+    el.style.cssText = `
+      position: fixed; left: ${x - size / 2}px; top: ${y - size / 2}px;
+      width: ${size}px; height: ${size}px; border-radius: 50%;
+      pointer-events: none; z-index: 2147483646; ${css}
     `;
-    document.body.appendChild(ripple);
-    setTimeout(() => ripple.remove(), 800);
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), duration);
+  };
 
-    // Center dot
-    const dot = document.createElement('div');
-    dot.style.cssText = `
-      position: fixed; left: ${x - 12}px; top: ${y - 12}px;
-      width: 24px; height: 24px; background: ${color};
-      border-radius: 50%; pointer-events: none; z-index: 2147483646;
-      box-shadow: 0 0 20px ${color};
-      animation: foxClickPulse 0.6s ease-out forwards;
-    `;
-    document.body.appendChild(dot);
-    setTimeout(() => dot.remove(), 600);
+  if (isPlayback) {
+    spawn(60, `border: 4px solid ${color}; animation: foxClickRipple 0.8s ease-out forwards;`, 800);
+    spawn(24, `background: ${color}; box-shadow: 0 0 20px ${color}; animation: foxClickPulse 0.6s ease-out forwards;`, 600);
   } else {
-    // Simple dot for recording
-    const dot = document.createElement('div');
-    dot.style.cssText = `
-      position: fixed; left: ${x - 10}px; top: ${y - 10}px;
-      width: 20px; height: 20px; background: ${color};
-      border-radius: 50%; pointer-events: none; z-index: 2147483646;
-      opacity: 0.7; animation: foxClickPulse 0.5s ease-out forwards;
-    `;
-    document.body.appendChild(dot);
-    setTimeout(() => dot.remove(), 500);
+    spawn(20, `background: ${color}; opacity: 0.7; animation: foxClickPulse 0.5s ease-out forwards;`, 500);
   }
 }
 
-// Tab switching
 function switchTab(tabName) {
-  activeTab = tabName;
-
-  // Update tab buttons
-  const tabs = foxShadowRoot.querySelectorAll('.fox-tab-btn');
-  tabs.forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.tab === tabName);
-  });
-
-  // Update tab content
-  const contents = foxShadowRoot.querySelectorAll('.fox-tab-content');
-  contents.forEach(content => {
-    content.classList.toggle('active', content.dataset.tab === tabName);
-  });
+  state.activeTab = tabName;
+  qa('.fox-tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tabName));
+  qa('.fox-tab-content').forEach(content => content.classList.toggle('active', content.dataset.tab === tabName));
 }

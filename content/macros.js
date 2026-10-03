@@ -1,245 +1,159 @@
-// Fox Macro Recorder - Macro Operations (CRUD)
+// Fox Macro Recorder - Macro list (render + CRUD)
+// Clicks/changes in the list are handled once by bindMacroListEvents(), not per render.
 
 let deleteConfirmMacroId = null;
 let deleteConfirmTimer = null;
 
 async function loadMacros() {
-  const list = foxShadowRoot?.querySelector('#fox-macros-list');
-  if (!list) return;
+  const list = q('#fox-macros-list');
+  const allMacros = await getMacros();
 
-  const result = await chrome.storage.local.get(['macros']);
-  const allMacros = result.macros || [];
+  // Domain filter dropdown
+  const domainFilter = q('#fox-domain-filter');
+  const allDomains = [...new Set(allMacros.map(m => m.domain || ''))].sort(compareDomains);
+  const selectedDomain = allDomains.includes(domainFilter.value) ? domainFilter.value : '__all__';
+  domainFilter.innerHTML = html`
+    <option value="__all__">All domains</option>
+    ${allDomains.map(d => html`<option value="${d}" ${d === selectedDomain ? 'selected' : ''}>${d || 'Ungrouped'}</option>`)}
+  `;
 
-  // Populate domain filter dropdown
-  const domainFilter = foxShadowRoot?.querySelector('#fox-domain-filter');
-  const selectedDomain = domainFilter?.value ?? '__all__';
-  if (domainFilter) {
-    const allDomains = [...new Set(allMacros.map(m => m.domain || ''))].sort((a, b) => {
-      if (!a) return 1;
-      if (!b) return -1;
-      return a.localeCompare(b);
-    });
-    domainFilter.innerHTML = '<option value="__all__">All domains</option>' +
-      allDomains.map(d => `<option value="${d}"${d === selectedDomain ? ' selected' : ''}>${d || 'Ungrouped'}</option>`).join('');
-  }
+  const macros = selectedDomain === '__all__'
+    ? allMacros
+    : allMacros.filter(m => (m.domain || '') === selectedDomain);
 
-  // Filter macros by selected domain
-  const macros = selectedDomain !== '__all__'
-    ? allMacros.filter(m => (m.domain || '') === selectedDomain)
-    : allMacros;
-
-  // Update macro select dropdown (uses filtered list)
   updateMacroSelect(macros);
 
   if (macros.length === 0) {
     list.innerHTML = '<div class="fox-empty">No macros saved</div>';
-    return;
+  } else {
+    const groups = {};
+    macros.forEach(m => (groups[m.domain || ''] ??= []).push(m));
+
+    list.innerHTML = html`${Object.keys(groups).sort(compareDomains).map(domain => html`
+      <div class="fox-domain-group-header">${domain || 'Ungrouped'}</div>
+      ${groups[domain].map(renderMacroCard)}
+    `)}`;
   }
 
-  // Group macros by domain
-  const groups = {};
-  macros.forEach(m => {
-    const domain = m.domain || '';
-    if (!groups[domain]) groups[domain] = [];
-    groups[domain].push(m);
-  });
+  renderMode();
+}
 
-  // Sort domain keys: named domains first (alphabetically), ungrouped last
-  const domainKeys = Object.keys(groups).sort((a, b) => {
-    if (!a) return 1;
-    if (!b) return -1;
-    return a.localeCompare(b);
-  });
-
-  list.innerHTML = domainKeys.map(domain => {
-    const header = `<div class="fox-domain-group-header">${domain || 'Ungrouped'}</div>`;
-    const cards = groups[domain].map(m => {
-      const totalTime = m.actions.length > 0 ? m.actions[m.actions.length - 1].timestamp : 0;
-      const loopCount = m.loopCount || 1;
-      const loopDelay = m.loopDelay || 0;
-      const info = formatMacroInfo(m.actions.length, totalTime);
-      const isConfirming = deleteConfirmMacroId === m.id;
-
-      return `
-      <div class="fox-macro-card${isConfirming ? ' confirm-delete' : ''}" data-id="${m.id}">
-        ${isConfirming ? `
-          <div class="fox-macro-row">
-            <span class="fox-macro-name">Delete "${m.name}"?</span>
-          </div>
-          <div class="fox-delete-confirm">
-            <button class="fox-btn-cancel-delete" data-action="cancel-delete">Cancel</button>
-            <button class="fox-btn-confirm-delete" data-action="confirm-delete">Confirm Delete</button>
-          </div>
-        ` : `
-          <div class="fox-macro-row">
-            <span class="fox-macro-name">${m.name}</span>
-            <span class="fox-macro-info">${info}</span>
-          </div>
-          <div class="fox-macro-row2">
-            <div class="fox-macro-actions">
-              <button class="fox-action-btn fox-abtn-play" data-action="play" title="Play">\u25B6</button>
-              <button class="fox-action-btn fox-abtn-edit" data-action="edit" title="Edit">\u270E</button>
-              <button class="fox-action-btn fox-abtn-delete" data-action="delete" title="Delete">\uD83D\uDDD1</button>
-            </div>
-            <div class="fox-loop-controls">
-              <div class="fox-loop-item" title="Loop count">
-                <span>\uD83D\uDD01</span>
-                <input type="number" class="fox-loop-input fox-loop-count" value="${loopCount}" min="1" max="999" data-id="${m.id}">
-              </div>
-              <div class="fox-loop-item" title="Delay between loops (ms)">
-                <span>\u23F1</span>
-                <input type="number" class="fox-loop-input fox-loop-delay" value="${loopDelay}" min="0" data-id="${m.id}">
-              </div>
-            </div>
-          </div>
-        `}
+function renderMacroCard(m) {
+  if (deleteConfirmMacroId === m.id) {
+    return html`
+      <div class="fox-macro-card confirm-delete" data-id="${m.id}">
+        <div class="fox-macro-row">
+          <span class="fox-macro-name">Delete "${m.name}"?</span>
+        </div>
+        <div class="fox-delete-confirm">
+          <button class="fox-btn-cancel-delete" data-action="cancel-delete">Cancel</button>
+          <button class="fox-btn-confirm-delete" data-action="confirm-delete">Confirm Delete</button>
+        </div>
       </div>
-      `;
-    }).join('');
-    return header + cards;
-  }).join('');
+    `;
+  }
 
-  // Bind events
-  list.querySelectorAll('.fox-macro-card').forEach(card => {
-    const id = card.dataset.id;
+  const totalTime = m.actions.length > 0 ? m.actions[m.actions.length - 1].timestamp : 0;
+  return html`
+    <div class="fox-macro-card" data-id="${m.id}">
+      <div class="fox-macro-row">
+        <span class="fox-macro-name">${m.name}</span>
+        <span class="fox-macro-info">${formatMacroInfo(m.actions.length, totalTime)}</span>
+      </div>
+      <div class="fox-macro-row2">
+        <div class="fox-macro-actions">
+          <button class="fox-action-btn fox-abtn-play" data-action="play" title="Play">▶</button>
+          <button class="fox-action-btn fox-abtn-edit" data-action="edit" title="Edit">✎</button>
+          <button class="fox-action-btn fox-abtn-delete" data-action="delete" title="Delete">🗑</button>
+        </div>
+        <div class="fox-loop-controls">
+          <div class="fox-loop-item" title="Loop count">
+            <span>🔁</span>
+            <input type="number" class="fox-loop-input" data-field="loopCount" value="${m.loopCount || 1}" min="1" max="999">
+          </div>
+          <div class="fox-loop-item" title="Delay between loops (ms)">
+            <span>⏱</span>
+            <input type="number" class="fox-loop-input" data-field="loopDelay" value="${m.loopDelay || 0}" min="0">
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
 
-    // Play
-    const playBtn = card.querySelector('[data-action="play"]');
-    if (playBtn) {
-      playBtn.addEventListener('click', async () => {
-        if (isPlaying) {
-          shouldStopPlayback = true;
-        } else {
-          await playMacro(id, playBtn);
-        }
-      });
+function bindMacroListEvents() {
+  const list = q('#fox-macros-list');
+
+  list.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    const id = btn?.closest('.fox-macro-card')?.dataset.id;
+    if (!id) return;
+
+    switch (btn.dataset.action) {
+      case 'play': togglePlayback(id); break;
+      case 'edit': openEditPanel(id); break;
+      case 'delete': showDeleteConfirm(id); break;
+      case 'cancel-delete': cancelDeleteConfirm(); break;
+      case 'confirm-delete': confirmDelete(id); break;
     }
+  });
 
-    // Edit
-    card.querySelector('[data-action="edit"]')?.addEventListener('click', () => {
-      openEditPanel(id);
-    });
+  list.addEventListener('change', (e) => {
+    const input = e.target.closest('[data-field]');
+    const id = input?.closest('.fox-macro-card')?.dataset.id;
+    if (!id) return;
 
-    // Delete (first click)
-    card.querySelector('[data-action="delete"]')?.addEventListener('click', () => {
-      showDeleteConfirm(id);
-    });
-
-    // Cancel delete
-    card.querySelector('[data-action="cancel-delete"]')?.addEventListener('click', () => {
-      cancelDeleteConfirm();
-    });
-
-    // Confirm delete
-    card.querySelector('[data-action="confirm-delete"]')?.addEventListener('click', () => {
-      confirmDelete(id);
-    });
-
-    // Loop controls
-    const loopCountInput = card.querySelector('.fox-loop-count');
-    const loopDelayInput = card.querySelector('.fox-loop-delay');
-
-    loopCountInput?.addEventListener('change', async () => {
-      await updateMacroLoopSettings(id, parseInt(loopCountInput.value) || 1, null);
-    });
-
-    loopDelayInput?.addEventListener('change', async () => {
-      await updateMacroLoopSettings(id, null, parseInt(loopDelayInput.value) || 0);
-    });
+    const field = input.dataset.field;
+    const value = field === 'loopCount' ? (parseInt(input.value) || 1) : (parseInt(input.value) || 0);
+    updateMacros(macros => macros.map(m => m.id === id ? { ...m, [field]: value } : m));
   });
 }
 
 function updateMacroSelect(macros) {
-  const select = foxShadowRoot?.querySelector('#fox-macro-select');
-  if (!select) return;
-
-  if (macros.length > 0) {
-    select.innerHTML = macros.map(m =>
-      `<option value="${m.id}">${m.name}${m.domain ? ` (${m.domain})` : ''}</option>`
-    ).join('');
-    select.disabled = false;
-  } else {
-    select.innerHTML = '<option value="">No macros</option>';
-    select.disabled = true;
-  }
-
-  const playBtn = foxShadowRoot?.querySelector('#fox-play-btn');
-  if (playBtn) playBtn.disabled = macros.length === 0;
+  const select = q('#fox-macro-select');
+  select.innerHTML = macros.length > 0
+    ? html`${macros.map(m => html`<option value="${m.id}">${m.name}${m.domain ? ` (${m.domain})` : ''}</option>`)}`
+    : '<option value="">No macros</option>';
 }
 
-function showDeleteConfirm(macroId) {
-  if (deleteConfirmTimer) clearTimeout(deleteConfirmTimer);
-  deleteConfirmMacroId = macroId;
+function showDeleteConfirm(id) {
+  clearTimeout(deleteConfirmTimer);
+  deleteConfirmMacroId = id;
   loadMacros();
 
   // Auto-cancel after 5 seconds
   deleteConfirmTimer = setTimeout(() => {
-    if (deleteConfirmMacroId === macroId) {
-      cancelDeleteConfirm();
-    }
+    if (deleteConfirmMacroId === id) cancelDeleteConfirm();
   }, 5000);
 }
 
 function cancelDeleteConfirm() {
-  if (deleteConfirmTimer) clearTimeout(deleteConfirmTimer);
+  clearTimeout(deleteConfirmTimer);
   deleteConfirmMacroId = null;
-  deleteConfirmTimer = null;
   loadMacros();
 }
 
 async function confirmDelete(id) {
-  if (deleteConfirmTimer) clearTimeout(deleteConfirmTimer);
+  clearTimeout(deleteConfirmTimer);
   deleteConfirmMacroId = null;
-  deleteConfirmTimer = null;
-
-  const result = await chrome.storage.local.get(['macros']);
-  const macros = result.macros.filter(m => m.id !== id);
-  await chrome.storage.local.set({ macros });
+  await updateMacros(macros => macros.filter(m => m.id !== id));
   loadMacros();
-  showToast('\u2713 Macro deleted', 'success');
-}
-
-async function updateMacroLoopSettings(id, loopCount, loopDelay) {
-  const result = await chrome.storage.local.get(['macros']);
-  const macros = result.macros || [];
-  const macroIndex = macros.findIndex(m => m.id === id);
-
-  if (macroIndex !== -1) {
-    if (loopCount !== null) macros[macroIndex].loopCount = loopCount;
-    if (loopDelay !== null) macros[macroIndex].loopDelay = loopDelay;
-    await chrome.storage.local.set({ macros });
-  }
-}
-
-async function deleteMacro(id) {
-  const result = await chrome.storage.local.get(['macros']);
-  const macros = result.macros.filter(m => m.id !== id);
-  await chrome.storage.local.set({ macros });
-  loadMacros();
+  showToast('✓ Macro deleted', 'success');
 }
 
 async function saveMacro() {
-  const saveInput = foxShadowRoot?.querySelector('#fox-save-input');
-  const domainInput = foxShadowRoot?.querySelector('#fox-save-domain');
-  const saveBar = foxShadowRoot?.querySelector('.fox-save-bar');
-
-  const name = saveInput?.value.trim() || `Macro ${Date.now()}`;
-  const domain = domainInput?.value.trim() || '';
   const macro = {
     id: Date.now().toString(),
-    name: name,
-    domain: domain,
+    name: q('#fox-save-input').value.trim() || `Macro ${Date.now()}`,
+    domain: q('#fox-save-domain').value.trim(),
     createdAt: new Date().toISOString(),
-    actions: recordedActions
+    actions: state.recordedActions
   };
 
-  const result = await chrome.storage.local.get(['macros']);
-  const macros = result.macros || [];
-  macros.push(macro);
-  await chrome.storage.local.set({ macros });
+  await updateMacros(macros => [...macros, macro]);
 
-  if (saveBar) saveBar.classList.remove('visible');
-  recordedActions = [];
+  q('.fox-save-bar').classList.remove('visible');
+  state.recordedActions = [];
   loadMacros();
-  showToast('\u2713 Macro saved', 'success');
+  showToast('✓ Macro saved', 'success');
 }

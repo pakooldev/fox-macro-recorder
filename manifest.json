@@ -20,8 +20,9 @@
         "<all_urls>"
       ],
       "js": [
-        "content/styles.js",
         "content/utils.js",
+        "content/store.js",
+        "content/styles.js",
         "content/components/toast.js",
         "content/components/fab.js",
         "content/recording.js",
