@@ -29,7 +29,7 @@ function isOwnUi(target) {
 }
 
 function setPlayButton(btn, showStop, playClass, stopClass) {
-  btn.textContent = showStop ? '⏹' : '▶';
+  btn.innerHTML = icon(showStop ? 'stop' : 'play');
   btn.className = showStop ? stopClass : playClass;
   btn.title = showStop ? 'Stop' : 'Play';
 }
@@ -73,6 +73,15 @@ function renderMode() {
   foxFab?.classList.toggle('playing', isPlaying && !isRecording);
 }
 
+// Pixelify Sans, registered on the document (@font-face inside a shadow root is ignored).
+// Loaded from bytes so the page's CSP font-src can't block it; falls back to the system font.
+async function loadPixelFont() {
+  if ([...document.fonts].some(f => f.family === 'FoxPixel')) return;
+  const res = await fetch(chrome.runtime.getURL('assets/fonts/pixelify-sans.woff2'));
+  const font = new FontFace('FoxPixel', await res.arrayBuffer(), { weight: '400 700' });
+  document.fonts.add(await font.load());
+}
+
 // ==========================================
 // Init
 // ==========================================
@@ -88,6 +97,7 @@ function renderMode() {
   style.textContent = ':host { pointer-events: none; } :host > * { pointer-events: auto; }' + getFoxStyles();
   state.root.appendChild(style);
 
+  loadPixelFont().catch(() => {});
   createPanel();
   createFab();
   document.addEventListener('click', handleClick, true);

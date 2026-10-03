@@ -131,41 +131,31 @@ function getSelector(element) {
   return path.join(' > ');
 }
 
-// Show visual feedback for clicks (rendered OUTSIDE shadow root for correct positioning)
+// Pixel click feedback on the page itself (outside the shadow root, so it sits at the
+// clicked point): a hollow square that grows in 4 steps; playback adds 4 flying sparks.
 function showClickFeedback(x, y, color, isPlayback = false) {
   if (!document.getElementById('fox-click-feedback-styles')) {
     const style = document.createElement('style');
     style.id = 'fox-click-feedback-styles';
     style.textContent = `
-      @keyframes foxClickPulse {
-        0% { transform: scale(1); opacity: 0.7; }
-        100% { transform: scale(2); opacity: 0; }
-      }
-      @keyframes foxClickRipple {
-        0% { transform: scale(0.5); opacity: 1; }
-        50% { transform: scale(1.5); opacity: 0.6; }
-        100% { transform: scale(3); opacity: 0; }
-      }
+      @keyframes foxPxRing { from { width: 12px; height: 12px; margin: -6px; } to { width: 40px; height: 40px; margin: -20px; } }
+      @keyframes foxPxSpark { to { transform: translate(var(--dx), var(--dy)); } }
     `;
     document.head.appendChild(style);
   }
 
-  const spawn = (size, css, duration) => {
+  const spawn = (css) => {
     const el = document.createElement('div');
-    el.style.cssText = `
-      position: fixed; left: ${x - size / 2}px; top: ${y - size / 2}px;
-      width: ${size}px; height: ${size}px; border-radius: 50%;
-      pointer-events: none; z-index: 2147483646; ${css}
-    `;
+    el.style.cssText = `position: fixed; left: ${x}px; top: ${y}px; pointer-events: none; z-index: 2147483646; ${css}`;
     document.body.appendChild(el);
-    setTimeout(() => el.remove(), duration);
+    setTimeout(() => el.remove(), 320);
   };
 
+  spawn(`border: 2px solid ${color}; box-shadow: 2px 2px 0 #000; animation: foxPxRing 240ms steps(4) forwards;`);
   if (isPlayback) {
-    spawn(60, `border: 4px solid ${color}; animation: foxClickRipple 0.8s ease-out forwards;`, 800);
-    spawn(24, `background: ${color}; box-shadow: 0 0 20px ${color}; animation: foxClickPulse 0.6s ease-out forwards;`, 600);
-  } else {
-    spawn(20, `background: ${color}; opacity: 0.7; animation: foxClickPulse 0.5s ease-out forwards;`, 500);
+    for (const [dx, dy] of [[-16, -16], [16, -16], [-16, 16], [16, 16]]) {
+      spawn(`width: 4px; height: 4px; margin: -2px; background: ${color}; --dx: ${dx}px; --dy: ${dy}px; animation: foxPxSpark 240ms steps(4) forwards;`);
+    }
   }
 }
 

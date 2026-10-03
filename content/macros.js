@@ -24,7 +24,13 @@ async function loadMacros() {
   updateMacroSelect(macros);
 
   if (macros.length === 0) {
-    list.innerHTML = '<div class="fox-empty">No macros saved</div>';
+    list.innerHTML = html`
+      <div class="fox-empty">
+        <span class="fox-mascot fox-mascot-2x fox-m-sleep"></span>
+        <div>NO MACROS YET</div>
+        <div class="fox-empty-hint">Press ${icon('record')} to record</div>
+      </div>
+    `;
   } else {
     const groups = {};
     macros.forEach(m => (groups[m.domain || ''] ??= []).push(m));
@@ -62,17 +68,17 @@ function renderMacroCard(m) {
       </div>
       <div class="fox-macro-row2">
         <div class="fox-macro-actions">
-          <button class="fox-action-btn fox-abtn-play" data-action="play" title="Play">▶</button>
-          <button class="fox-action-btn fox-abtn-edit" data-action="edit" title="Edit">✎</button>
-          <button class="fox-action-btn fox-abtn-delete" data-action="delete" title="Delete">🗑</button>
+          <button class="fox-action-btn fox-abtn-play" data-action="play" title="Play">${icon('play')}</button>
+          <button class="fox-action-btn fox-abtn-edit" data-action="edit" title="Edit">${icon('edit')}</button>
+          <button class="fox-action-btn fox-abtn-delete" data-action="delete" title="Delete">${icon('trash')}</button>
         </div>
         <div class="fox-loop-controls">
           <div class="fox-loop-item" title="Loop count">
-            <span>🔁</span>
+            ${icon('repeat')}
             <input type="number" class="fox-loop-input" data-field="loopCount" value="${m.loopCount || 1}" min="1" max="999">
           </div>
           <div class="fox-loop-item" title="Delay between loops (ms)">
-            <span>⏱</span>
+            ${icon('clock')}
             <input type="number" class="fox-loop-input" data-field="loopDelay" value="${m.loopDelay || 0}" min="0">
           </div>
         </div>
@@ -138,7 +144,7 @@ async function confirmDelete(id) {
   deleteConfirmMacroId = null;
   await updateMacros(macros => macros.filter(m => m.id !== id));
   loadMacros();
-  showToast('✓ Macro deleted', 'success');
+  showToast('Macro deleted', 'success');
 }
 
 async function saveMacro() {
@@ -155,5 +161,5 @@ async function saveMacro() {
   q('.fox-save-bar').classList.remove('visible');
   state.recordedActions = [];
   loadMacros();
-  showToast('✓ Macro saved', 'success');
+  showToast('Macro saved', 'success');
 }

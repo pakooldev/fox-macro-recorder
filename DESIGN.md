@@ -133,7 +133,7 @@ Raised box, navy fill, 6px shadow. Fixed top-right as today, draggable by the he
 
 - **Header (title bar):** 40px, orange fill with brown bottom bevel, black text. Left: `assets/sprites/logo.png` at 1× (32px) + "FOX" in pixel 16px. Center: tabs. Right: minimal-mode, minimize, close as 32px icon buttons (black icons on orange, no box until hover).
 - **Tabs:** Home / Inspector / Settings as 32px icon buttons. Active tab = navy fill with cream icon and the header's bottom bevel removed under it (it "connects" to the body, like a game menu tab).
-- **Minimal mode:** only the header + control bar, as today.
+- **Minimal mode:** only the header + control bar; the macro select is fixed at 200px so long names don't stretch the panel.
 
 ### 3.2 Control bar
 
@@ -163,7 +163,7 @@ Appears after a recording stops. Two inset inputs (name, domain) and a green "SA
   - Row 2: actions Play (blue) / Edit (silver) / Delete (silver, red on hover) as 32px icon buttons; loop count and loop delay as small inset number inputs, each with a 24px icon (repeat, clock) instead of today's emoji.
   - Playing card: border turns blue and its Play button shows Stop.
   - **Delete confirm:** border and fill switch to red/plum, text `DELETE "name"?`, buttons CANCEL (silver) / DELETE (red). Auto-cancels after 5s (current behavior).
-- **Empty state:** sleeping mascot (1×) centered, `NO MACROS YET` in pixel 12px, hint `Press ● to record` in silver.
+- **Empty state:** sleeping mascot (2×, `.fox-mascot-2x`) centered, `NO MACROS YET` in pixel 12px, hint `Press ● to record` in silver.
 
 ### 3.6 Settings tab
 
@@ -186,13 +186,13 @@ Silver title bar like the edit panel, crosshair icon. Live readout in an inset b
 
 ### 3.9 FAB (`#fox-fab`)
 
-Shown while the panel is minimized. 64px raised square (orange fill), mascot sprite at 1× (58px frame). The mascot's pose is the state indicator:
+Shown while the panel is minimized. 68px raised square (orange fill), mascot sprite at 1× (58px frame). The mascot's pose is the state indicator:
 - idle → `idle` loop (blink), recording → `record` loop + red border, playing → `play` loop + blue border.
 Draggable as today.
 
 ### 3.10 Toast
 
-Bottom-center, raised box, navy fill, border color by type (green success / blue info / red error), 24px icon + pixel 12px message. Slides up 8px in `--fox-step`. For success after playback, the icon slot shows the mascot `success` frame instead.
+Bottom-center, raised box, navy fill, border color by type (green success / blue info / red error), 24px icon + pixel 12px message. Slides up 8px in `--fox-step`. (The mascot `success` frame is in the sheet but not used in toasts: at 58px it made the toast too tall.)
 
 ### 3.11 Click feedback (drawn on the page, outside the shadow root)
 
@@ -220,9 +220,9 @@ Brand/mascot art (toolbar icon, mascot sprites, store promo art) is custom pixel
 
 ## 5. Implementation notes
 
-- **Where things live:** tokens + all component CSS in `content/styles.js` (`:host, :root`); inline SVG icon strings in a new `content/icons.js` (one object, `icon('play')` returns `html`-safe markup); sprite and font files in `assets/`.
+- **Where things live:** tokens + all component CSS in `content/styles.js` (`:host`); inline SVG icon strings in `content/icons.js` (`icon('play')` returns `html`-safe markup; generated from `assets/icons-src/`); sprite and font files in `assets/`. Mascot sizes use `--f` (one frame on screen: 58px, or 116px with `.fox-mascot-2x`), so the same state classes and keyframes work at both scales.
 - **Fonts inside Shadow DOM:** `@font-face` inside a shadow root is ignored by Chrome. Register the font on the document from the content script: `fetch(chrome.runtime.getURL('assets/fonts/pixelify-sans.woff2'))` → `new FontFace('FoxPixel', buffer)` → `document.fonts.add(...)`. Loading from bytes also avoids the page's CSP `font-src`.
-- **Sprites on pages with strict CSP:** `<img src="chrome-extension://…">` / `data:` URLs can be blocked by a page's `img-src`. Test the refactor on a strict-CSP site (e.g. github.com). If blocked, decode the PNG with `fetch` + `createImageBitmap` and draw it to a `<canvas>` (canvas isn't subject to `img-src`).
+- **Sprites on pages with strict CSP:** sprites are CSS backgrounds with `chrome-extension://` URLs inside the shadow root. Verified on github.com (2026-10-03): font and sprites load. If a site ever blocks them, decode the PNG with `fetch` + `createImageBitmap` and draw it to a `<canvas>` (canvas isn't subject to `img-src`).
 - **`web_accessible_resources`:** `assets/fonts/*`, `assets/sprites/*`, with `"use_dynamic_url": true` so sites can't probe for the extension by a fixed URL. This adds no install warning.
 - **Mascot sheet** `assets/sprites/mascot.png` (232×348): 58×58 frames, 4 columns, one row per state in this order, frames left to right, transparent, shared baseline:
 

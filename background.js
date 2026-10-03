@@ -5,6 +5,7 @@
 // Order matters: main.js runs the init and must come last.
 const CONTENT_FILES = [
   'content/utils.js',
+  'content/icons.js',
   'content/store.js',
   'content/styles.js',
   'content/components/toast.js',

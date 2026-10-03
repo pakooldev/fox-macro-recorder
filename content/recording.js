@@ -32,7 +32,7 @@ function startRecording() {
   state.recordedActions = [];
   q('.fox-save-bar').classList.remove('visible');
   renderMode();
-  showToast('⏺ Recording started', 'info');
+  showToast('Recording started', 'info');
 }
 
 function stopRecording() {

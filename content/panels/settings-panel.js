@@ -10,7 +10,7 @@ function renderSettingsTab() {
         <div class="fox-section-label">PLAYBACK</div>
         <div class="fox-settings-row">
           <div class="fox-settings-label">
-            <span class="fox-settings-icon">🎲</span>
+            <span class="fox-settings-icon">${icon('shuffle')}</span>
             <span>Random Delay</span>
           </div>
           <div class="fox-toggle${s.randomDelayEnabled ? ' active' : ''}" id="fox-random-delay-toggle" title="Add random delays between clicks">
@@ -30,7 +30,7 @@ function renderSettingsTab() {
         <div class="fox-about">
           <div class="fox-version">Fox Macro Recorder v${chrome.runtime.getManifest().version}</div>
           <div class="fox-about-links">
-            <a class="fox-about-link" href="https://buymeacoffee.com/panat.siriwong" target="_blank">Buy Me a Coffee</a>
+            <a class="fox-about-link" href="https://buymeacoffee.com/panat.siriwong" target="_blank" rel="noopener">${icon('coffee')} Buy me a coffee</a>
           </div>
         </div>
       </div>
@@ -46,7 +46,7 @@ function renderSettingsTab() {
   toggle.addEventListener('click', async () => {
     toggle.classList.toggle('active', !s.randomDelayEnabled);
     await set('randomDelayEnabled', !s.randomDelayEnabled);
-    showToast('✓ Settings updated', 'success');
+    showToast('Settings updated', 'success');
   });
 
   const minInput = container.querySelector('#fox-delay-min');

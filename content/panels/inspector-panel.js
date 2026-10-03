@@ -10,10 +10,10 @@ function openInspectorPanel() {
   foxInspectorPanel = document.createElement('div');
   foxInspectorPanel.id = 'fox-inspector-panel';
 
-  foxInspectorPanel.innerHTML = `
+  foxInspectorPanel.innerHTML = html`
     <div class="fox-inspector-panel-header">
-      <div class="fox-inspector-panel-title">\uD83D\uDD0D Inspector</div>
-      <button class="fox-icon-btn" id="fox-inspector-close" title="Close">\u00D7</button>
+      <div class="fox-inspector-panel-title">${icon('target')} Inspector</div>
+      <button class="fox-icon-btn" id="fox-inspector-close" title="Close">${icon('close')}</button>
     </div>
     <div id="fox-inspector-content"></div>
   `;
@@ -52,7 +52,7 @@ function activateInspector() {
   isInspectorActive = true;
   document.addEventListener('mousemove', trackMousePosition);
   document.addEventListener('click', captureSnapshot, true);
-  showToast('\uD83D\uDD0D Inspector activated', 'info');
+  showToast('Inspector activated', 'info');
 }
 
 function deactivateInspector() {
@@ -108,7 +108,7 @@ function updateInspectorContent(currentData) {
   const currentHTML = currentData ? html`
     <div class="fox-insp-current">
       <div class="fox-insp-coords">
-        <span class="fox-insp-icon">\u271B</span>
+        <span class="fox-insp-icon">${icon('target')}</span>
         <span>${currentData.x}, ${currentData.y}</span>
       </div>
       <div class="fox-insp-element">

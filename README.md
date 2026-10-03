@@ -318,7 +318,8 @@ fox-macro-recorder/
 │   ├── main.js            # Entry point: shared state, shadow root, renderMode()
 │   ├── store.js           # The only code touching chrome.storage
 │   ├── utils.js           # html`` escaping, dragging, selectors, click feedback
-│   ├── styles.js          # Panel CSS
+│   ├── icons.js           # Inline pixel SVG icons
+│   ├── styles.js          # "Pixel Fox" CSS (see DESIGN.md)
 │   ├── recording.js       # Recording logic
 │   ├── playback.js        # Playback logic
 │   ├── macros.js          # Macro list + CRUD
@@ -326,6 +327,8 @@ fox-macro-recorder/
 │   └── components/        # fab, toast
 ├── background.js          # Icon click toggles the panel; injects content/ (file list lives here)
 ├── tests/                 # node --test tests/*.test.mjs
+├── assets/                # Font, sprites, icon sources, store art (see assets/ASSETS.md)
+├── DESIGN.md              # Design system
 └── icons/
     ├── icon16.png        # Extension icons
     ├── icon48.png

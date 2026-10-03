@@ -39,7 +39,7 @@ async function playMacro(id) {
     await playActions(macro.actions, loop, loopCount);
 
     if (loop < loopCount && loopDelay > 0 && !state.shouldStop) {
-      setProgress(`⏸ ${loop + 1}/${loopCount}`);
+      setProgress(`WAIT ${loop + 1}/${loopCount}`);
       await sleep(loopDelay + jitter());
     }
   }
@@ -49,7 +49,7 @@ async function playMacro(id) {
   state.shouldStop = false;
   state.playingId = null;
   renderMode();
-  showToast(stopped ? '⏹ Playback stopped' : '✓ Playback complete', stopped ? 'info' : 'success');
+  showToast(stopped ? 'Playback stopped' : 'Playback complete', stopped ? 'info' : 'success');
 }
 
 async function playActions(actions, currentLoop, totalLoops) {
@@ -73,7 +73,7 @@ function simulateClick({ x, y }) {
 
   const { outline, transition } = element.style;
   element.style.transition = 'outline 0.2s';
-  element.style.outline = '3px solid #3B82F6';
+  element.style.outline = '2px dashed #29ADFF';
   setTimeout(() => {
     element.style.outline = outline;
     element.style.transition = transition;

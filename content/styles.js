@@ -1,1431 +1,471 @@
-// Fox Macro Recorder - Design System & Styles
-// All CSS is injected into Shadow DOM for complete isolation
+// Fox Macro Recorder - "Pixel Fox" styles (see DESIGN.md)
+// The only stylesheet: injected into the Shadow DOM, so nothing leaks to or from the page.
 
 function getFoxStyles() {
+  const asset = path => `url("${chrome.runtime.getURL(path)}")`;
+
   return `
     /* ==========================================
-       CSS Variables (Design System)
+       Tokens (DESIGN.md §2)
        ========================================== */
     :host {
-      --fox-primary: #6366F1;
-      --fox-primary-hover: #4F46E5;
-      --fox-primary-light: #EEF2FF;
-      --fox-gray-900: #111827;
-      --fox-gray-700: #374151;
-      --fox-gray-500: #6B7280;
-      --fox-gray-400: #9CA3AF;
-      --fox-gray-300: #D1D5DB;
-      --fox-gray-200: #E5E7EB;
-      --fox-gray-100: #F3F4F6;
-      --fox-gray-50: #F9FAFB;
-      --fox-white: #FFFFFF;
-      --fox-red: #EF4444;
-      --fox-red-light: #FEE2E2;
-      --fox-blue: #3B82F6;
-      --fox-blue-light: #DBEAFE;
-      --fox-green: #10B981;
-      --fox-green-light: #D1FAE5;
-      --fox-orange: #F59E0B;
-      --fox-orange-light: #FEF3C7;
-      --fox-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
-      --fox-mono: 'SF Mono', 'Consolas', 'Monaco', monospace;
-      --fox-radius-sm: 6px;
-      --fox-radius-md: 8px;
-      --fox-radius-lg: 12px;
-      --fox-shadow: 0 8px 32px rgba(0,0,0,0.18);
-      --fox-shadow-lg: 0 12px 48px rgba(0,0,0,0.25);
-      --fox-z-panel: 2147483647;
-      --fox-z-toast: 2147483648;
+      /* PICO-8 palette */
+      --px-black: #000000;    --px-navy: #1D2B53;     --px-plum: #7E2553;    --px-pine: #008751;
+      --px-brown: #AB5236;    --px-stone: #5F574F;    --px-silver: #C2C3C7;  --px-cream: #FFF1E8;
+      --px-red: #FF004D;      --px-orange: #FFA300;   --px-yellow: #FFEC27;  --px-green: #00E436;
+      --px-blue: #29ADFF;     --px-lavender: #83769C; --px-pink: #FF77A8;    --px-peach: #FFCCAA;
+
+      --fox-bg: var(--px-navy);
+      --fox-inset: var(--px-black);
+      --fox-line: var(--px-lavender);
+      --fox-text: var(--px-cream);
+      --fox-text-2: var(--px-silver);
+      --fox-text-muted: var(--px-lavender);
+
+      --fox-font-pixel: 'FoxPixel', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --fox-font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans Thai', sans-serif;
+      --fox-font-mono: ui-monospace, 'SF Mono', Consolas, monospace;
+
+      --fox-step-fast: 80ms steps(2);
+      --fox-step: 160ms steps(4);
+
+      --fox-mascot: ${asset('assets/sprites/mascot.png')};
+      --fox-logo: ${asset('assets/sprites/logo.png')};
     }
 
-    /* ==========================================
-       Reset & Base
-       ========================================== */
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+
+    .fox-icon { width: 24px; height: 24px; display: block; flex: none; shape-rendering: crispEdges; }
 
     /* ==========================================
-       Panel Container
+       Windows: main panel, edit panel, inspector
        ========================================== */
-    #fox-panel {
+    #fox-panel, #fox-edit-panel, #fox-inspector-panel {
       position: fixed;
-      top: 20px;
-      right: 20px;
-      width: 360px;
-      min-width: 280px;
-      max-width: 90vw;
-      max-height: 90vh;
-      background: var(--fox-white);
-      border-radius: var(--fox-radius-lg);
-      box-shadow: var(--fox-shadow);
-      font-family: var(--fox-font);
-      z-index: var(--fox-z-panel);
-      overflow: hidden;
-      font-size: 14px;
-      color: var(--fox-gray-900);
       display: flex;
       flex-direction: column;
-      transition: opacity 0.2s, transform 0.2s;
+      max-width: 90vw;
+      background: var(--fox-bg);
+      color: var(--fox-text);
+      border: 2px solid var(--px-black);
+      box-shadow: inset 2px 2px 0 var(--px-lavender), inset -2px -2px 0 var(--px-black), 6px 6px 0 var(--px-black);
+      font: 14px/1.4 var(--fox-font-pixel);
+      z-index: 2147483647;
     }
 
-    #fox-panel.hidden {
-      display: none;
-    }
+    #fox-panel { top: 20px; right: 20px; width: 360px; min-width: 280px; max-height: 90vh; }
+    #fox-panel.hidden { display: none; }
+    #fox-edit-panel { top: 60px; right: 400px; width: 340px; max-height: 80vh; }
+    #fox-inspector-panel { top: 60px; left: 20px; width: 300px; max-height: 80vh; }
 
-    /* Minimal mode: control bar only */
-    #fox-panel.minimal-mode {
-      width: auto;
-      min-width: 0;
-    }
-
-    #fox-panel.minimal-mode .fox-tabs,
-    #fox-panel.minimal-mode .fox-save-bar,
-    #fox-panel.minimal-mode .fox-domain-filter-bar,
-    #fox-panel.minimal-mode .fox-macros,
-    #fox-panel.minimal-mode .fox-status-strip,
-    #fox-panel.minimal-mode .fox-tab-content[data-tab="settings"] {
-      display: none !important;
-    }
-
-    #fox-panel.minimal-mode .fox-control-bar {
-      border-bottom: none;
-    }
-
-    /* Recording mode: minimal panel with only status + stop */
-    #fox-panel.recording-mode {
-      width: auto;
-      min-width: 0;
-      height: auto;
-      max-height: none;
-    }
-
-    #fox-panel.recording-mode .fox-tabs,
-    #fox-panel.recording-mode .fox-header-actions,
-    #fox-panel.recording-mode .fox-btn-record,
-    #fox-panel.recording-mode .fox-macro-select,
-    #fox-panel.recording-mode .fox-btn-play-main,
-    #fox-panel.recording-mode .fox-save-bar,
-    #fox-panel.recording-mode .fox-domain-filter-bar,
-    #fox-panel.recording-mode .fox-macros,
-    #fox-panel.recording-mode .fox-tab-content[data-tab="settings"] {
-      display: none !important;
-    }
-
-    #fox-panel.recording-mode .fox-control-bar {
-      border-bottom: none;
-      justify-content: center;
-      padding: 6px 12px;
-    }
-
-    #fox-panel.recording-mode .fox-ctrl-btn {
-      width: 32px;
-      height: 32px;
-      font-size: 14px;
-    }
-
-    /* ==========================================
-       Header
-       ========================================== */
-    .fox-header {
-      background: var(--fox-primary);
-      color: var(--fox-white);
-      padding: 8px 12px;
+    /* Title bars */
+    .fox-header, .fox-edit-panel-header, .fox-inspector-panel-header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      gap: 8px;
+      height: 40px;
+      flex: none;
+      padding: 0 4px 0 6px;
+      color: var(--px-black);
       cursor: move;
       user-select: none;
-      flex-shrink: 0;
     }
+    .fox-header { background: var(--px-orange); box-shadow: inset 0 -2px 0 var(--px-brown); }
+    .fox-edit-panel-header, .fox-inspector-panel-header { background: var(--px-silver); box-shadow: inset 0 -2px 0 var(--px-stone); }
 
-    .fox-header-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
+    .fox-header-left { display: flex; align-items: center; gap: 6px; }
     .fox-logo {
-      font-size: 16px;
-      line-height: 1;
+      width: 32px; height: 32px; flex: none;
+      background: var(--fox-logo) no-repeat;
+      image-rendering: pixelated;
+    }
+    .fox-title { font-size: 16px; font-weight: 700; letter-spacing: 1px; }
+
+    .fox-edit-panel-title, .fox-inspector-panel-title {
+      display: flex; align-items: center; gap: 6px;
+      flex: 1; min-width: 0;
+      font-size: 14px; font-weight: 700; text-transform: uppercase;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
-    .fox-title {
-      font-weight: 600;
-      font-size: 14px;
+    .fox-tabs { display: flex; gap: 2px; margin: 0 auto; }
+    .fox-header-actions, .fox-edit-panel-actions { display: flex; align-items: center; gap: 2px; }
+
+    .fox-tab-btn, .fox-icon-btn {
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--px-black);
+    }
+    .fox-tab-btn:hover, .fox-icon-btn:hover { box-shadow: inset 0 0 0 2px var(--px-black); }
+    .fox-tab-btn.active { background: var(--fox-bg); color: var(--fox-text); box-shadow: inset 2px 2px 0 var(--px-lavender); }
+
+    /* Tabs */
+    .fox-tab-content { display: none; flex: 1; min-height: 0; overflow-y: auto; }
+    .fox-tab-content.active { display: flex; flex-direction: column; }
+
+    /* ==========================================
+       Buttons (raised) — DESIGN.md §3 states
+       ========================================== */
+    .fox-ctrl-btn, .fox-action-btn, .fox-save-btn, .fox-edit-save-btn,
+    .fox-btn-cancel-delete, .fox-btn-confirm-delete, .fox-snap-clear {
+      --fill: var(--px-silver); --hi: var(--px-cream); --lo: var(--px-stone);
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+      flex: none;
+      background: var(--fill);
+      color: var(--px-black);
+      border: 2px solid var(--px-black);
+      box-shadow: inset 2px 2px 0 var(--hi), inset -2px -2px 0 var(--lo), 2px 2px 0 var(--px-black);
+      font: 700 12px var(--fox-font-pixel);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .fox-ctrl-btn { width: 40px; height: 40px; }
+    .fox-action-btn { width: 32px; height: 32px; }
+    .fox-save-btn, .fox-edit-save-btn, .fox-btn-cancel-delete, .fox-btn-confirm-delete { height: 32px; padding: 0 10px; }
+    .fox-snap-clear { height: 24px; padding: 0 8px; font-size: 10px; }
+
+    .fox-btn-record, .fox-btn-confirm-delete { --fill: var(--px-red); --hi: var(--px-pink); --lo: var(--px-plum); }
+    .fox-btn-play-main, .fox-abtn-play { --fill: var(--px-blue); --hi: var(--px-cream); --lo: var(--px-navy); }
+    .fox-save-btn, .fox-edit-save-btn { --fill: var(--px-green); --hi: var(--px-cream); --lo: var(--px-pine); }
+    .fox-abtn-delete:hover { --fill: var(--px-red); --hi: var(--px-pink); --lo: var(--px-plum); }
+
+    :is(.fox-ctrl-btn, .fox-action-btn, .fox-save-btn, .fox-edit-save-btn,
+        .fox-btn-cancel-delete, .fox-btn-confirm-delete, .fox-snap-clear):not(:disabled):hover {
+      outline: 2px solid var(--px-cream);
+      outline-offset: -6px;
+    }
+    :is(.fox-ctrl-btn, .fox-action-btn, .fox-save-btn, .fox-edit-save-btn,
+        .fox-btn-cancel-delete, .fox-btn-confirm-delete, .fox-snap-clear):not(:disabled):active {
+      transform: translate(2px, 2px);
+      box-shadow: inset 2px 2px 0 var(--hi), inset -2px -2px 0 var(--lo);
+    }
+    :is(.fox-ctrl-btn, .fox-action-btn):disabled {
+      --fill: var(--px-stone); --hi: var(--px-stone); --lo: var(--px-stone);
+      color: var(--px-silver);
+      box-shadow: none;
+      cursor: not-allowed;
     }
 
-    .fox-tabs {
-      display: flex;
-      gap: 2px;
-      align-items: center;
+    button:focus-visible, input:focus-visible, select:focus-visible, .fox-toggle:focus-visible {
+      outline: 2px dashed var(--px-orange);
+      outline-offset: 2px;
     }
 
-    .fox-tab-btn {
-      background: rgba(255,255,255,0.12);
-      border: none;
-      color: rgba(255,255,255,0.7);
-      width: 32px;
+    /* ==========================================
+       Inputs (inset)
+       ========================================== */
+    input, select {
       height: 32px;
-      border-radius: var(--fox-radius-sm);
-      cursor: pointer;
-      font-size: 14px;
-      transition: all 0.15s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
-
-    .fox-tab-btn:hover {
-      background: rgba(255,255,255,0.2);
-      color: var(--fox-white);
-    }
-
-    .fox-tab-btn.active {
-      background: rgba(255,255,255,0.25);
-      color: var(--fox-white);
-    }
-
-    .fox-header-actions {
-      display: flex;
-      gap: 2px;
-      align-items: center;
-    }
-
-    .fox-icon-btn {
-      background: rgba(255,255,255,0.12);
-      border: none;
-      color: rgba(255,255,255,0.7);
-      width: 28px;
-      height: 28px;
-      border-radius: var(--fox-radius-sm);
-      cursor: pointer;
-      font-size: 13px;
-      transition: all 0.15s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .fox-icon-btn:hover {
-      background: rgba(255,255,255,0.2);
-      color: var(--fox-white);
-      transform: scale(1.05);
-    }
-
-    /* ==========================================
-       Tab Content
-       ========================================== */
-    .fox-tab-content {
-      display: none;
-      flex: 1;
-      overflow-y: auto;
-      min-height: 0;
-    }
-
-    .fox-tab-content.active {
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* ==========================================
-       Home Tab
-       ========================================== */
-    .fox-control-bar {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--fox-gray-200);
-      flex-shrink: 0;
-    }
-
-    .fox-ctrl-btn {
-      width: 40px;
-      height: 40px;
-      border: none;
-      border-radius: 50%;
-      font-size: 18px;
-      cursor: pointer;
-      transition: all 0.15s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .fox-ctrl-btn:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-      transform: none !important;
-    }
-
-    .fox-btn-record {
-      background: var(--fox-red);
-      color: var(--fox-white);
-    }
-
-    .fox-btn-record:hover:not(:disabled) {
-      background: #DC2626;
-      transform: scale(1.08);
-    }
-
-    .fox-btn-stop {
-      background: var(--fox-gray-400);
-      color: var(--fox-white);
-    }
-
-    .fox-btn-stop:hover:not(:disabled) {
-      background: var(--fox-gray-500);
-      transform: scale(1.08);
-    }
-
-    .fox-macro-select {
-      flex: 1;
-      height: 36px;
-      padding: 0 10px;
-      border: 1px solid var(--fox-gray-300);
-      border-radius: var(--fox-radius-sm);
-      font-size: 13px;
-      font-family: var(--fox-font);
-      background: var(--fox-white);
-      color: var(--fox-gray-900);
-      cursor: pointer;
       min-width: 0;
-    }
-
-    .fox-macro-select:focus {
+      padding: 0 8px;
+      background: var(--fox-inset);
+      color: var(--fox-text);
+      border: 2px solid var(--px-black);
+      box-shadow: inset 2px 2px 0 var(--px-stone);
+      font: 14px var(--fox-font-ui);
+      border-radius: 0;
       outline: none;
-      border-color: var(--fox-primary);
-      box-shadow: 0 0 0 2px var(--fox-primary-light);
     }
+    input::placeholder { color: var(--fox-text-muted); }
+    input[type="number"] { font: 12px var(--fox-font-pixel); text-align: right; -moz-appearance: textfield; }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
-    .fox-macro-select:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+    .fox-select { position: relative; display: flex; flex: 1; min-width: 0; }
+    .fox-select select { flex: 1; appearance: none; padding-right: 32px; cursor: pointer; }
+    .fox-select select:disabled { color: var(--fox-text-muted); cursor: not-allowed; }
+    .fox-select .fox-icon { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--fox-text-2); }
+    .fox-control-bar .fox-select select { height: 40px; }
 
-    .fox-btn-play-main {
-      background: var(--fox-blue-light);
-      color: var(--fox-blue);
-    }
+    /* ==========================================
+       Home tab
+       ========================================== */
+    .fox-control-bar { display: flex; align-items: center; gap: 8px; padding: 10px 8px 8px; }
 
-    .fox-btn-play-main:hover:not(:disabled) {
-      background: #BFDBFE;
-      transform: scale(1.08);
-    }
-
-    .fox-btn-stop-main {
-      background: var(--fox-red);
-      color: var(--fox-white);
-    }
-
-    .fox-btn-stop-main:hover:not(:disabled) {
-      background: #DC2626;
-      transform: scale(1.08);
-    }
-
-    /* Status Strip */
     .fox-status-strip {
       display: none;
       align-items: center;
       justify-content: space-between;
-      padding: 6px 12px;
-      font-size: 12px;
-      font-weight: 600;
-      flex-shrink: 0;
-    }
-
-    .fox-status-strip.visible {
-      display: flex;
-    }
-
-    .fox-status-strip.recording {
-      background: var(--fox-red-light);
-      color: var(--fox-red);
-    }
-
-    .fox-status-strip.playing {
-      background: var(--fox-blue-light);
-      color: var(--fox-blue);
-    }
-
-    .fox-status-left {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .fox-status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      animation: foxPulseDot 1s infinite;
-    }
-
-    .fox-status-strip.recording .fox-status-dot {
-      background: var(--fox-red);
-    }
-
-    .fox-status-strip.playing .fox-status-dot {
-      background: var(--fox-blue);
-    }
-
-    /* Save Bar */
-    .fox-save-bar {
-      display: none;
-      flex-direction: column;
-      gap: 6px;
-      padding: 8px 12px;
-      border-bottom: 1px solid var(--fox-gray-200);
-      flex-shrink: 0;
-    }
-
-    .fox-save-bar.visible {
-      display: flex;
-    }
-
-    .fox-save-input {
-      width: 100%;
-      padding: 8px 10px;
-      border: 2px solid var(--fox-gray-300);
-      border-radius: var(--fox-radius-sm);
-      font-size: 13px;
-      font-family: var(--fox-font);
-      transition: border-color 0.15s;
-    }
-
-    .fox-save-input:focus {
-      outline: none;
-      border-color: var(--fox-green);
-      box-shadow: 0 0 0 2px var(--fox-green-light);
-    }
-
-    .fox-save-domain-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .fox-save-domain {
-      flex: 1;
-      padding: 6px 10px;
-      border: 1px solid var(--fox-gray-300);
-      border-radius: var(--fox-radius-sm);
-      font-size: 12px;
-      font-family: var(--fox-font);
-      color: var(--fox-gray-700);
-      transition: border-color 0.15s;
-    }
-
-    .fox-save-domain:focus {
-      outline: none;
-      border-color: var(--fox-green);
-      box-shadow: 0 0 0 2px var(--fox-green-light);
-    }
-
-    .fox-save-btn {
-      width: 36px;
-      height: 36px;
-      border: none;
-      border-radius: var(--fox-radius-sm);
-      background: var(--fox-green);
-      color: var(--fox-white);
-      font-size: 16px;
-      cursor: pointer;
-      transition: all 0.15s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .fox-save-btn:hover {
-      background: #059669;
-      transform: scale(1.05);
-    }
-
-    /* Domain Filter */
-    .fox-domain-filter-bar {
-      padding: 6px 12px;
-      border-bottom: 1px solid var(--fox-gray-200);
-      flex-shrink: 0;
-    }
-
-    .fox-domain-filter {
-      width: 100%;
-      height: 30px;
+      height: 28px;
+      margin: 0 8px 8px;
       padding: 0 8px;
-      border: 1px solid var(--fox-gray-300);
-      border-radius: var(--fox-radius-sm);
+      background: var(--fox-inset);
+      border: 2px solid var(--px-black);
+      box-shadow: inset 2px 2px 0 var(--px-stone);
       font-size: 12px;
-      font-family: var(--fox-font);
-      background: var(--fox-white);
-      color: var(--fox-gray-700);
-      cursor: pointer;
+      font-weight: 700;
+      letter-spacing: 1px;
     }
+    .fox-status-strip.visible { display: flex; }
+    .fox-status-left { display: flex; align-items: center; gap: 8px; }
+    .fox-status-dot { width: 8px; height: 8px; background: var(--px-blue); }
+    .fox-status-strip.recording .fox-status-left { color: var(--px-red); }
+    .fox-status-strip.recording .fox-status-dot { background: var(--px-red); animation: fox-blink 1s steps(2, jump-none) infinite; }
+    .fox-status-strip.playing .fox-status-left { color: var(--px-blue); }
 
-    .fox-domain-filter:focus {
-      outline: none;
-      border-color: var(--fox-primary);
-      box-shadow: 0 0 0 2px var(--fox-primary-light);
-    }
+    .fox-save-bar { display: none; flex-direction: column; gap: 8px; padding: 0 8px 8px; }
+    .fox-save-bar.visible { display: flex; }
+    .fox-save-domain-row { display: flex; gap: 8px; }
+    .fox-save-domain-row input { flex: 1; }
 
-    /* Macro List */
-    .fox-macros {
-      flex: 1;
-      overflow-y: auto;
-      padding: 8px;
-      min-height: 0;
-    }
+    .fox-domain-filter-bar { display: flex; padding: 0 8px 8px; }
 
-    .fox-empty {
-      color: var(--fox-gray-400);
-      font-size: 13px;
-      text-align: center;
-      padding: 24px 12px;
-    }
+    .fox-macros { padding: 0 8px 8px; }
 
     .fox-domain-group-header {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--fox-gray-500);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 8px 4px 4px;
-      margin-top: 4px;
-      border-bottom: 1px solid var(--fox-gray-200);
-      margin-bottom: 6px;
+      display: flex; align-items: center; gap: 8px;
+      margin: 4px 0 8px;
+      color: var(--fox-text-muted);
+      font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
     }
-
-    .fox-domain-group-header:first-child {
-      margin-top: 0;
-    }
+    .fox-domain-group-header::after { content: ''; flex: 1; height: 2px; background: var(--fox-line); }
 
     .fox-macro-card {
-      background: var(--fox-white);
-      border-radius: var(--fox-radius-md);
-      padding: 10px 12px;
-      margin-bottom: 6px;
-      border: 1px solid var(--fox-gray-200);
-      transition: border-color 0.15s, background 0.2s;
+      display: flex; flex-direction: column; gap: 8px;
+      margin-bottom: 8px;
+      padding: 8px;
+      background: var(--fox-bg);
+      border: 2px solid var(--fox-line);
+      box-shadow: 2px 2px 0 var(--px-black);
     }
+    .fox-macro-card:has(.fox-abtn-stop) { border-color: var(--px-blue); }
+    .fox-macro-card.confirm-delete { background: var(--px-plum); border-color: var(--px-red); }
 
-    .fox-macro-card:last-child {
-      margin-bottom: 0;
-    }
-
-    .fox-macro-card:hover {
-      border-color: var(--fox-gray-300);
-    }
-
-    /* Delete confirmation state */
-    .fox-macro-card.confirm-delete {
-      background: var(--fox-red-light);
-      border-color: #FECACA;
-    }
-
-    .fox-macro-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
+    .fox-macro-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
     .fox-macro-name {
-      font-weight: 600;
-      font-size: 13px;
-      color: var(--fox-gray-900);
-      flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      min-width: 0;
+      font: 14px var(--fox-font-ui);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
+    .fox-macro-info { flex: none; color: var(--fox-text-2); font-size: 12px; }
 
-    .fox-macro-info {
-      font-size: 11px;
-      color: var(--fox-gray-400);
-      margin-left: 8px;
-      white-space: nowrap;
-      font-family: var(--fox-mono);
+    .fox-macro-row2 { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .fox-macro-actions { display: flex; gap: 6px; }
+    .fox-loop-controls { display: flex; gap: 8px; }
+    .fox-loop-item { display: flex; align-items: center; gap: 2px; color: var(--fox-text-2); }
+    .fox-loop-input { width: 56px; }
+
+    .fox-delete-confirm { display: flex; justify-content: flex-end; gap: 8px; }
+
+    .fox-empty {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      padding: 16px 8px 8px;
+      font-size: 12px; font-weight: 700; letter-spacing: 1px;
     }
-
-    .fox-macro-row2 {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 8px;
-      gap: 6px;
+    .fox-empty-hint {
+      display: flex; align-items: center; gap: 2px;
+      color: var(--fox-text-2); font-weight: 400; letter-spacing: 0;
     }
-
-    .fox-macro-actions {
-      display: flex;
-      gap: 4px;
-      flex-shrink: 0;
-    }
-
-    .fox-action-btn {
-      width: 32px;
-      height: 32px;
-      border: none;
-      border-radius: var(--fox-radius-sm);
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.15s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .fox-action-btn:hover {
-      transform: scale(1.1);
-    }
-
-    .fox-abtn-play {
-      background: var(--fox-blue-light);
-      color: var(--fox-blue);
-    }
-
-    .fox-abtn-play:hover { background: #BFDBFE; }
-
-    .fox-abtn-stop {
-      background: var(--fox-red);
-      color: var(--fox-white);
-    }
-
-    .fox-abtn-edit {
-      background: var(--fox-primary-light);
-      color: var(--fox-primary);
-    }
-
-    .fox-abtn-edit:hover { background: #E0E7FF; }
-
-    .fox-abtn-delete {
-      background: var(--fox-red-light);
-      color: var(--fox-red);
-    }
-
-    .fox-abtn-delete:hover { background: #FECACA; }
-
-    /* Delete confirmation buttons */
-    .fox-delete-confirm {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: 100%;
-      margin-top: 8px;
-    }
-
-    .fox-delete-msg {
-      flex: 1;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--fox-red);
-    }
-
-    .fox-btn-cancel-delete {
-      padding: 6px 12px;
-      border: 1px solid var(--fox-gray-300);
-      border-radius: var(--fox-radius-sm);
-      background: var(--fox-white);
-      color: var(--fox-gray-700);
-      font-size: 12px;
-      font-family: var(--fox-font);
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .fox-btn-cancel-delete:hover {
-      background: var(--fox-gray-50);
-    }
-
-    .fox-btn-confirm-delete {
-      padding: 6px 12px;
-      border: none;
-      border-radius: var(--fox-radius-sm);
-      background: var(--fox-red);
-      color: var(--fox-white);
-      font-size: 12px;
-      font-weight: 500;
-      font-family: var(--fox-font);
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .fox-btn-confirm-delete:hover {
-      background: #DC2626;
-    }
-
-    .fox-loop-controls {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-      flex: 1;
-      justify-content: flex-end;
-      min-width: 110px;
-    }
-
-    .fox-loop-item {
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      font-size: 12px;
-      color: var(--fox-gray-500);
-    }
-
-    .fox-loop-item span {
-      font-size: 12px;
-    }
-
-    .fox-loop-input {
-      width: 50px;
-      padding: 4px 4px;
-      border: 1px solid var(--fox-gray-200);
-      border-radius: 4px;
-      font-size: 11px;
-      font-family: var(--fox-font);
-      text-align: center;
-      transition: border-color 0.15s;
-    }
-
-    .fox-loop-input:focus {
-      outline: none;
-      border-color: var(--fox-primary);
-      box-shadow: 0 0 0 2px var(--fox-primary-light);
-    }
+    .fox-empty-hint .fox-icon { color: var(--px-red); }
 
     /* ==========================================
-       Edit Panel (Standalone Floating)
+       Settings tab
        ========================================== */
-    #fox-edit-panel {
-      position: fixed;
-      top: 60px;
-      right: 400px;
-      width: 340px;
-      max-width: 90vw;
-      max-height: 80vh;
-      background: var(--fox-white);
-      border-radius: var(--fox-radius-lg);
-      box-shadow: var(--fox-shadow-lg);
-      font-family: var(--fox-font);
-      z-index: var(--fox-z-panel);
-      overflow: hidden;
-      font-size: 14px;
-      color: var(--fox-gray-900);
-      display: flex;
-      flex-direction: column;
-    }
-
-    .fox-edit-panel-header {
-      background: var(--fox-primary);
-      color: var(--fox-white);
-      padding: 8px 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: move;
-      user-select: none;
-      flex-shrink: 0;
-    }
-
-    .fox-edit-panel-title {
-      font-weight: 600;
-      font-size: 13px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .fox-edit-panel-actions {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-    }
-
-    .fox-resize-grip {
-      position: absolute;
-      bottom: 0;
-      width: 16px;
-      height: 16px;
-      opacity: 0.35;
-      transition: opacity 0.15s;
-    }
-
-    .fox-resize-grip:hover {
-      opacity: 0.7;
-    }
-
-    .fox-resize-grip-br {
-      right: 0;
-      cursor: nwse-resize;
-      background:
-        linear-gradient(135deg,
-          transparent 50%,
-          var(--fox-gray-400) 50%, var(--fox-gray-400) 60%,
-          transparent 60%, transparent 70%,
-          var(--fox-gray-400) 70%, var(--fox-gray-400) 80%,
-          transparent 80%
-        );
-      border-radius: 0 0 var(--fox-radius-lg) 0;
-    }
-
-    .fox-resize-grip-bl {
-      left: 0;
-      cursor: nesw-resize;
-      background:
-        linear-gradient(225deg,
-          transparent 50%,
-          var(--fox-gray-400) 50%, var(--fox-gray-400) 60%,
-          transparent 60%, transparent 70%,
-          var(--fox-gray-400) 70%, var(--fox-gray-400) 80%,
-          transparent 80%
-        );
-      border-radius: 0 0 0 var(--fox-radius-lg);
-    }
-
-    /* ==========================================
-       Edit Components (shared)
-       ========================================== */
-    .fox-edit-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--fox-gray-200);
-      flex-shrink: 0;
-    }
-
-    .fox-back-btn {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      background: none;
-      border: none;
-      color: var(--fox-gray-500);
-      font-size: 13px;
-      font-family: var(--fox-font);
-      cursor: pointer;
-      padding: 4px 8px;
-      border-radius: var(--fox-radius-sm);
-      transition: all 0.15s;
-    }
-
-    .fox-back-btn:hover {
-      background: var(--fox-gray-100);
-      color: var(--fox-gray-900);
-    }
-
-    .fox-edit-save-btn {
-      padding: 6px 16px;
-      border: none;
-      border-radius: var(--fox-radius-sm);
-      background: var(--fox-green);
-      color: var(--fox-white);
-      font-size: 13px;
-      font-weight: 500;
-      font-family: var(--fox-font);
-      cursor: pointer;
-      transition: all 0.15s;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .fox-edit-save-btn:hover {
-      background: #059669;
-      transform: scale(1.02);
-    }
-
-    .fox-edit-body {
-      padding: 12px;
-      overflow-y: auto;
-      flex: 1;
-      min-height: 0;
-    }
-
-    .fox-edit-name {
-      width: 100%;
-      padding: 8px 10px;
-      border: 2px solid var(--fox-gray-200);
-      border-radius: var(--fox-radius-md);
-      font-size: 14px;
-      font-weight: 600;
-      font-family: var(--fox-font);
-      margin-bottom: 12px;
-      transition: border-color 0.15s;
-    }
-
-    .fox-edit-name:focus {
-      outline: none;
-      border-color: var(--fox-primary);
-      box-shadow: 0 0 0 2px var(--fox-primary-light);
-    }
-
-    .fox-edit-domain {
-      width: 100%;
-      padding: 6px 10px;
-      border: 1px solid var(--fox-gray-200);
-      border-radius: var(--fox-radius-md);
-      font-size: 12px;
-      font-family: var(--fox-font);
-      color: var(--fox-gray-700);
-      margin-bottom: 12px;
-      transition: border-color 0.15s;
-    }
-
-    .fox-edit-domain:focus {
-      outline: none;
-      border-color: var(--fox-primary);
-      box-shadow: 0 0 0 2px var(--fox-primary-light);
-    }
-
-    .fox-section-label {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--fox-gray-400);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .fox-actions-list {
-      background: var(--fox-gray-50);
-      border-radius: var(--fox-radius-md);
-      padding: 6px;
-      max-height: 240px;
-      overflow-y: auto;
-      margin-bottom: 12px;
-    }
-
-    .fox-action-item {
-      background: var(--fox-white);
-      border-radius: var(--fox-radius-sm);
-      padding: 6px 8px;
-      margin-bottom: 3px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border: 1px solid var(--fox-gray-200);
-      transition: border-color 0.15s;
-    }
-
-    .fox-action-item:hover { border-color: var(--fox-gray-300); }
-    .fox-action-item:last-child { margin-bottom: 0; }
-
-    .fox-action-num {
-      background: var(--fox-primary);
-      color: var(--fox-white);
-      min-width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      font-weight: 600;
-      flex-shrink: 0;
-    }
-
-    .fox-action-text {
-      flex: 1;
-      font-size: 11px;
-      color: var(--fox-gray-500);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .fox-action-coords {
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      font-size: 11px;
-      color: var(--fox-gray-400);
-    }
-
-    .fox-coord-input {
-      width: 44px;
-      padding: 3px 4px;
-      border: 1px solid var(--fox-gray-200);
-      border-radius: 4px;
-      font-size: 11px;
-      font-family: var(--fox-mono);
-      text-align: center;
-      transition: border-color 0.15s;
-    }
-
-    .fox-coord-input:focus {
-      outline: none;
-      border-color: var(--fox-primary);
-    }
-
-    .fox-delay-chip {
-      display: flex;
-      align-items: center;
-      gap: 2px;
-      background: var(--fox-gray-100);
-      padding: 3px 5px;
-      border-radius: 4px;
-      font-size: 10px;
-      color: var(--fox-gray-500);
-    }
-
-    .fox-delay-input {
-      width: 46px;
-      padding: 3px 4px;
-      border: 1px solid var(--fox-gray-200);
-      border-radius: 4px;
-      font-size: 11px;
-      font-family: var(--fox-mono);
-      text-align: center;
-      transition: border-color 0.15s;
-    }
-
-    .fox-delay-input:focus {
-      outline: none;
-      border-color: var(--fox-primary);
-    }
-
-    /* ==========================================
-       Inspector Panel (Standalone Floating)
-       ========================================== */
-    #fox-inspector-panel {
-      position: fixed;
-      top: 60px;
-      left: 20px;
-      width: 300px;
-      max-width: 90vw;
-      max-height: 80vh;
-      background: var(--fox-white);
-      border-radius: var(--fox-radius-lg);
-      box-shadow: var(--fox-shadow-lg);
-      font-family: var(--fox-font);
-      z-index: var(--fox-z-panel);
-      overflow: hidden;
-      font-size: 14px;
-      color: var(--fox-gray-900);
-      display: flex;
-      flex-direction: column;
-    }
-
-    .fox-inspector-panel-header {
-      background: var(--fox-primary);
-      color: var(--fox-white);
-      padding: 8px 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: move;
-      user-select: none;
-      flex-shrink: 0;
-    }
-
-    .fox-inspector-panel-title {
-      font-weight: 600;
-      font-size: 13px;
-    }
-
-    /* ==========================================
-       Inspector Components
-       ========================================== */
-    .fox-inspector-body {
-      padding: 12px;
-      flex: 1;
-      overflow-y: auto;
-    }
-
-    .fox-insp-current {
-      background: var(--fox-primary-light);
-      border-radius: var(--fox-radius-md);
-      padding: 12px;
-      margin-bottom: 12px;
-    }
-
-    .fox-insp-coords {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--fox-primary);
-      font-family: var(--fox-mono);
-    }
-
-    .fox-insp-icon { font-size: 14px; }
-
-    .fox-insp-element {
-      font-size: 12px;
-      color: var(--fox-gray-500);
-      margin-top: 6px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .fox-insp-tag { color: var(--fox-primary); font-weight: 500; }
-    .fox-insp-id { color: #EC4899; }
-
-    .fox-insp-empty {
-      color: var(--fox-gray-400);
-      font-size: 12px;
-      text-align: center;
-      padding: 12px;
-    }
-
-    .fox-snap-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-    }
-
-    .fox-snap-clear {
-      background: none;
-      border: none;
-      color: var(--fox-red);
-      font-size: 11px;
-      font-weight: 500;
-      cursor: pointer;
-      padding: 2px 6px;
-    }
-
-    .fox-snap-clear:hover { text-decoration: underline; }
-
-    .fox-snap-list {
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .fox-snap-item {
-      background: var(--fox-gray-50);
-      border-radius: var(--fox-radius-sm);
-      padding: 6px 10px;
-      margin-bottom: 3px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .fox-snap-item:last-child { margin-bottom: 0; }
-
-    .fox-snap-num {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--fox-primary);
-      min-width: 20px;
-    }
-
-    .fox-snap-coords {
-      font-size: 12px;
-      font-family: var(--fox-mono);
-      color: var(--fox-gray-900);
-    }
-
-    .fox-snap-time {
-      font-size: 10px;
-      color: var(--fox-gray-400);
-    }
-
-    /* ==========================================
-       Settings Tab
-       ========================================== */
-    .fox-settings-body {
-      padding: 12px;
-      flex: 1;
-      overflow-y: auto;
-    }
-
-    .fox-settings-group {
-      margin-bottom: 16px;
-    }
-
-    .fox-settings-group:last-child {
-      margin-bottom: 0;
-    }
-
-    .fox-settings-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 12px;
-      background: var(--fox-gray-50);
-      border-radius: var(--fox-radius-md);
-      margin-bottom: 6px;
-    }
-
-    .fox-settings-row:last-child { margin-bottom: 0; }
-
-    .fox-settings-label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--fox-gray-900);
-    }
-
-    .fox-settings-icon { font-size: 15px; }
+    .fox-settings-body { display: flex; flex-direction: column; gap: 16px; padding: 10px 8px 12px; }
+    .fox-settings-group { display: flex; flex-direction: column; gap: 8px; }
+    .fox-section-label { color: var(--fox-text-muted); font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+    .fox-settings-row { display: flex; align-items: center; justify-content: space-between; }
+    .fox-settings-label { display: flex; align-items: center; gap: 8px; }
+    .fox-settings-icon { color: var(--px-orange); }
 
     .fox-toggle {
       position: relative;
-      width: 40px;
-      height: 22px;
-      background: var(--fox-gray-300);
-      border-radius: 11px;
+      width: 36px; height: 20px;
+      flex: none;
+      background: var(--fox-inset);
+      border: 2px solid var(--px-black);
+      box-shadow: inset 2px 2px 0 var(--px-stone);
       cursor: pointer;
-      transition: background 0.2s;
-      flex-shrink: 0;
     }
-
-    .fox-toggle.active {
-      background: var(--fox-primary);
-    }
-
     .fox-toggle-knob {
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 18px;
-      height: 18px;
-      background: var(--fox-white);
-      border-radius: 50%;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-      transition: transform 0.2s;
+      position: absolute; top: 2px; left: 2px;
+      width: 12px; height: 12px;
+      background: var(--px-stone);
+      transition: left var(--fox-step-fast);
     }
+    .fox-toggle.active { background: var(--px-green); box-shadow: inset 2px 2px 0 var(--px-pine); }
+    .fox-toggle.active .fox-toggle-knob { left: 18px; background: var(--px-cream); }
 
-    .fox-toggle.active .fox-toggle-knob {
-      transform: translateX(18px);
-    }
+    .fox-range-row { display: flex; align-items: center; gap: 8px; }
+    .fox-range-input { width: 64px; }
+    .fox-range-sep, .fox-range-unit { color: var(--fox-text-2); font-size: 12px; }
 
-    .fox-range-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      background: var(--fox-gray-50);
-      border-radius: var(--fox-radius-md);
-    }
-
-    .fox-range-input {
-      width: 60px;
-      padding: 5px 8px;
-      border: 1px solid var(--fox-gray-200);
-      border-radius: var(--fox-radius-sm);
-      font-size: 12px;
-      font-family: var(--fox-font);
-      text-align: center;
-      transition: border-color 0.15s;
-    }
-
-    .fox-range-input:focus {
-      outline: none;
-      border-color: var(--fox-primary);
-    }
-
-    .fox-range-sep {
-      color: var(--fox-gray-400);
-      font-size: 12px;
-    }
-
-    .fox-range-unit {
-      color: var(--fox-gray-400);
-      font-size: 12px;
-    }
-
-    .fox-about {
-      text-align: center;
-      padding: 12px;
-    }
-
-    .fox-version {
-      font-size: 12px;
-      color: var(--fox-gray-400);
-      margin-bottom: 8px;
-    }
-
-    .fox-about-links {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
+    .fox-about { display: flex; flex-direction: column; gap: 6px; }
+    .fox-version { color: var(--fox-text-2); font-size: 12px; }
     .fox-about-link {
-      font-size: 12px;
-      color: var(--fox-primary);
-      text-decoration: none;
-      cursor: pointer;
+      display: inline-flex; align-items: center; gap: 4px;
+      color: var(--px-orange); font-size: 12px; text-decoration: none;
+      border-bottom: 2px solid transparent;
+      align-self: flex-start;
     }
-
-    .fox-about-link:hover {
-      text-decoration: underline;
-    }
+    .fox-about-link:hover { border-bottom: 2px dotted var(--px-orange); }
 
     /* ==========================================
-       FAB (Floating Action Button)
+       Edit panel
+       ========================================== */
+    .fox-edit-body { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; padding: 10px 8px 16px; overflow-y: auto; }
+    .fox-actions-list {
+      display: flex; flex-direction: column;
+      background: var(--fox-inset);
+      border: 2px solid var(--px-black);
+      box-shadow: inset 2px 2px 0 var(--px-stone);
+      padding: 2px 2px 2px 4px;
+    }
+    .fox-action-item { display: flex; align-items: center; gap: 6px; padding: 4px 0; }
+    .fox-action-item + .fox-action-item { box-shadow: 0 -2px 0 var(--fox-bg); }
+    .fox-action-num {
+      width: 24px; height: 24px; flex: none;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--px-orange); color: var(--px-black);
+      font-size: 12px; font-weight: 700;
+    }
+    .fox-action-text { flex: 1; min-width: 0; font: 13px var(--fox-font-ui); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .fox-action-coords, .fox-delay-chip { display: flex; align-items: center; gap: 2px; color: var(--fox-text-2); font-size: 12px; }
+    .fox-coord-input, .fox-delay-input { width: 48px; height: 28px; padding: 0 4px; }
+
+    .fox-resize-grip { position: absolute; bottom: 4px; width: 12px; height: 12px; }
+    .fox-resize-grip::before {
+      content: ''; position: absolute; width: 4px; height: 4px; top: 0;
+      background: var(--fox-line);
+    }
+    .fox-resize-grip-br { right: 4px; cursor: nwse-resize; }
+    .fox-resize-grip-br::before { right: 0; box-shadow: 0 4px 0 var(--fox-line), -4px 4px 0 var(--fox-line), 0 8px 0 var(--fox-line), -4px 8px 0 var(--fox-line), -8px 8px 0 var(--fox-line); }
+    .fox-resize-grip-bl { left: 4px; cursor: nesw-resize; }
+    .fox-resize-grip-bl::before { left: 0; box-shadow: 0 4px 0 var(--fox-line), 4px 4px 0 var(--fox-line), 0 8px 0 var(--fox-line), 4px 8px 0 var(--fox-line), 8px 8px 0 var(--fox-line); }
+
+    /* ==========================================
+       Inspector
+       ========================================== */
+    .fox-inspector-body { display: flex; flex-direction: column; gap: 8px; padding: 10px 8px 8px; }
+    .fox-insp-current {
+      display: flex; flex-direction: column; gap: 4px;
+      padding: 8px;
+      background: var(--fox-inset);
+      border: 2px solid var(--px-black);
+      box-shadow: inset 2px 2px 0 var(--px-stone);
+    }
+    .fox-insp-coords { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 700; }
+    .fox-insp-icon { color: var(--px-orange); }
+    .fox-insp-element { font: 12px var(--fox-font-mono); }
+    .fox-insp-tag { color: var(--px-orange); }
+    .fox-insp-id { color: var(--fox-text-2); }
+    .fox-insp-empty { color: var(--fox-text-2); font-size: 12px; }
+    .fox-snap-header { display: flex; align-items: center; justify-content: space-between; min-height: 24px; }
+    .fox-snap-list { display: flex; flex-direction: column; gap: 4px; max-height: 200px; overflow-y: auto; }
+    .fox-snap-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+    .fox-snap-num {
+      width: 20px; height: 20px; flex: none;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--px-orange); color: var(--px-black); font-weight: 700;
+    }
+    .fox-snap-coords { flex: 1; }
+    .fox-snap-time { color: var(--fox-text-2); }
+
+    /* ==========================================
+       Mascot sprite (assets/sprites/mascot.png, 58×58 frames, DESIGN.md §5)
+       ========================================== */
+    /* --f = one frame on screen: 58px at 1×, 116px at 2× */
+    .fox-mascot {
+      --f: 58px;
+      display: block; flex: none;
+      width: var(--f); height: var(--f);
+      background: var(--fox-mascot) 0 0 / calc(var(--f) * 4) calc(var(--f) * 6) no-repeat;
+      image-rendering: pixelated;
+    }
+    .fox-mascot-2x { --f: 116px; }
+    .fox-m-idle { background-position-y: 0; animation: fox-blink-frame 3s step-end infinite; }
+    .fox-m-record { background-position-y: calc(var(--f) * -1); animation: fox-frames-2 0.8s steps(2) infinite; }
+    .fox-m-play { background-position-y: calc(var(--f) * -2); animation: fox-frames-4 0.6s steps(4) infinite; }
+    .fox-m-success { background-position-y: calc(var(--f) * -3); }
+    .fox-m-error { background-position-y: calc(var(--f) * -4); }
+    .fox-m-sleep { background-position-y: calc(var(--f) * -5); animation: fox-frames-2 1.6s steps(2) infinite; }
+
+    /* ==========================================
+       FAB (shown while minimized)
        ========================================== */
     #fox-fab {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      background: var(--fox-primary);
-      color: var(--fox-white);
-      border: none;
-      cursor: pointer;
-      font-size: 22px;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 16px rgba(99,102,241,0.4);
-      z-index: var(--fox-z-panel);
-      transition: all 0.2s;
+      position: fixed; bottom: 24px; right: 24px;
+      width: 68px; height: 68px;
+      display: none; align-items: center; justify-content: center;
+      background: var(--px-orange);
+      border: 2px solid var(--px-black);
+      box-shadow: inset 2px 2px 0 var(--px-peach), inset -2px -2px 0 var(--px-brown), 4px 4px 0 var(--px-black);
+      cursor: grab;
+      z-index: 2147483647;
       user-select: none;
     }
-
-    #fox-fab:hover {
-      transform: scale(1.08);
-      box-shadow: 0 6px 24px rgba(99,102,241,0.5);
-    }
-
-    #fox-fab.visible {
-      display: flex;
-    }
-
-    #fox-fab.recording {
-      background: var(--fox-red);
-      box-shadow: 0 4px 16px rgba(239,68,68,0.4);
-      animation: foxFabPulse 1.5s infinite;
-    }
-
-    #fox-fab.playing {
-      background: var(--fox-blue);
-      box-shadow: 0 4px 16px rgba(59,130,246,0.4);
-      animation: foxFabSpin 2s linear infinite;
-    }
+    #fox-fab.visible { display: flex; }
+    #fox-fab:hover { outline: 2px solid var(--px-cream); outline-offset: -6px; }
+    #fox-fab.recording { outline: 2px solid var(--px-red); outline-offset: 2px; }
+    #fox-fab.playing { outline: 2px solid var(--px-blue); outline-offset: 2px; }
+    #fox-fab.recording .fox-mascot { background-position-y: calc(var(--f) * -1); animation: fox-frames-2 0.8s steps(2) infinite; }
+    #fox-fab.playing .fox-mascot { background-position-y: calc(var(--f) * -2); animation: fox-frames-4 0.6s steps(4) infinite; }
 
     /* ==========================================
-       Toast Notifications
+       Toast
        ========================================== */
     .fox-toast {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      padding: 10px 20px;
-      background: #1F2937F2;
-      color: var(--fox-white);
-      font-size: 13px;
-      font-family: var(--fox-font);
-      border-radius: var(--fox-radius-md);
-      z-index: var(--fox-z-toast);
-      opacity: 0;
-      transition: opacity 0.2s, transform 0.2s;
-      pointer-events: auto;
-      cursor: pointer;
-      white-space: nowrap;
+      --type: var(--px-blue);
+      position: fixed; bottom: 24px; left: 50%;
+      display: flex; align-items: center; gap: 8px;
       max-width: 380px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .fox-toast.visible {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    .fox-toast-icon {
-      font-size: 14px;
-      flex-shrink: 0;
-    }
-
-    .fox-toast.success .fox-toast-icon { color: var(--fox-green); }
-    .fox-toast.error .fox-toast-icon { color: var(--fox-red); }
-    .fox-toast.info .fox-toast-icon { color: var(--fox-blue); }
-
-    /* ==========================================
-       Tooltips
-       ========================================== */
-    .fox-tooltip {
-      position: fixed;
-      background: var(--fox-gray-900);
-      color: var(--fox-white);
-      font-size: 11px;
-      font-family: var(--fox-font);
-      padding: 4px 8px;
-      border-radius: 4px;
-      z-index: 2147483649;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.15s;
+      padding: 6px 12px 6px 8px;
+      background: var(--fox-bg);
+      color: var(--fox-text);
+      border: 2px solid var(--type);
+      box-shadow: 4px 4px 0 var(--px-black);
+      font: 700 12px var(--fox-font-pixel);
+      letter-spacing: 1px;
       white-space: nowrap;
+      cursor: pointer;
+      opacity: 0;
+      transform: translate(-50%, 8px);
+      transition: opacity var(--fox-step), transform var(--fox-step);
+      z-index: 2147483647;
     }
-
-    .fox-tooltip.visible {
-      opacity: 1;
-    }
+    .fox-toast.visible { opacity: 1; transform: translate(-50%, 0); }
+    .fox-toast.success { --type: var(--px-green); }
+    .fox-toast.error { --type: var(--px-red); }
+    .fox-toast-icon { display: flex; color: var(--type); }
 
     /* ==========================================
-       Animations
+       Minimal mode: control bar only
        ========================================== */
-    @keyframes foxPulseDot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.8); }
-    }
+    #fox-panel.minimal-mode { width: auto; min-width: 0; }
+    #fox-panel.minimal-mode :is(.fox-tabs, .fox-save-bar, .fox-domain-filter-bar, .fox-macros, .fox-status-strip),
+    #fox-panel.minimal-mode .fox-tab-content[data-tab="settings"] { display: none !important; }
+    #fox-panel.minimal-mode .fox-tab-content[data-tab="home"] { display: flex; }
+    #fox-panel.minimal-mode .fox-select { width: 200px; flex: none; }
 
-    @keyframes foxFabPulse {
-      0%, 100% { box-shadow: 0 4px 16px rgba(239,68,68,0.4); }
-      50% { box-shadow: 0 4px 24px rgba(239,68,68,0.7); }
-    }
-
-    @keyframes foxFabSpin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    @keyframes foxClickPulse {
-      0% { transform: scale(1); opacity: 0.7; }
-      100% { transform: scale(2); opacity: 0; }
-    }
-
-    @keyframes foxClickRipple {
-      0% { transform: scale(0.5); opacity: 1; }
-      50% { transform: scale(1.5); opacity: 0.6; }
-      100% { transform: scale(3); opacity: 0; }
-    }
+    /* Recording mode: title + status + stop only */
+    #fox-panel.recording-mode { width: auto; min-width: 0; max-height: none; }
+    #fox-panel.recording-mode :is(.fox-tabs, .fox-header-actions, .fox-btn-record, .fox-select,
+      .fox-btn-play-main, .fox-save-bar, .fox-domain-filter-bar, .fox-macros),
+    #fox-panel.recording-mode .fox-tab-content[data-tab="settings"] { display: none !important; }
+    #fox-panel.recording-mode .fox-tab-content[data-tab="home"] { display: flex; }
+    #fox-panel.recording-mode .fox-header { padding-right: 12px; }
+    #fox-panel.recording-mode .fox-control-bar { justify-content: center; }
 
     /* ==========================================
-       Responsive
+       Scrollbars
        ========================================== */
-    @media (max-width: 768px) {
-      #fox-panel {
-        width: calc(100vw - 20px);
-        right: 10px;
-        top: 10px;
-        max-height: 80vh;
-      }
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: var(--px-black); }
+    ::-webkit-scrollbar-thumb { background: var(--fox-line); box-shadow: inset 2px 2px 0 var(--px-cream); }
+    ::-webkit-scrollbar-button { display: none; }
 
-      .fox-ctrl-btn {
-        width: 44px;
-        height: 44px;
-      }
+    /* ==========================================
+       Motion
+       ========================================== */
+    @keyframes fox-blink { from { visibility: visible; } to { visibility: hidden; } }
+    @keyframes fox-frames-2 { from { background-position-x: 0; } to { background-position-x: calc(var(--f) * -2); } }
+    @keyframes fox-frames-4 { from { background-position-x: 0; } to { background-position-x: calc(var(--f) * -4); } }
+    @keyframes fox-blink-frame { 0% { background-position-x: 0; } 92% { background-position-x: calc(var(--f) * -1); } 100% { background-position-x: calc(var(--f) * -1); } }
 
-      .fox-action-btn {
-        width: 36px;
-        height: 36px;
-      }
-
-      .fox-tab-btn {
-        width: 36px;
-        height: 36px;
-      }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
     }
   `;
 }

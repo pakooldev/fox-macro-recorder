@@ -2,14 +2,14 @@
 
 let foxToastActive = null;
 
-const TOAST_ICONS = { success: '✓', error: '⚠', info: 'ℹ' };
+const TOAST_ICONS = { success: 'check', error: 'alert', info: 'info' };
 
 function showToast(message, type = 'info', duration = 2000) {
   if (foxToastActive) foxToastActive.remove();
 
   const toast = document.createElement('div');
   toast.className = `fox-toast ${type}`;
-  toast.innerHTML = html`<span class="fox-toast-icon">${TOAST_ICONS[type] || TOAST_ICONS.info}</span><span>${message}</span>`;
+  toast.innerHTML = html`<span class="fox-toast-icon">${icon(TOAST_ICONS[type] || TOAST_ICONS.info)}</span><span>${message}</span>`;
 
   state.root.appendChild(toast);
   foxToastActive = toast;

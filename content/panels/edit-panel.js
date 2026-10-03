@@ -15,10 +15,10 @@ async function openEditPanel(id) {
   panel.id = 'fox-edit-panel';
   panel.innerHTML = html`
     <div class="fox-edit-panel-header">
-      <div class="fox-edit-panel-title">\u270F\uFE0F Edit: ${macro.name}</div>
+      <div class="fox-edit-panel-title">${icon('edit')} Edit: ${macro.name}</div>
       <div class="fox-edit-panel-actions">
-        <button class="fox-edit-save-btn" id="fox-edit-save">\u2713 Save</button>
-        <button class="fox-icon-btn" id="fox-edit-close" title="Close">\u00D7</button>
+        <button class="fox-edit-save-btn" id="fox-edit-save">${icon('check')} Save</button>
+        <button class="fox-icon-btn" id="fox-edit-close" title="Close">${icon('close')}</button>
       </div>
     </div>
     <div class="fox-edit-body">
@@ -73,7 +73,7 @@ async function openEditPanel(id) {
 
     await updateMacros(macros => macros.map(m => m.id === id ? { ...m, name, domain, actions } : m));
     loadMacros();
-    showToast('\u2713 Macro updated', 'success');
+    showToast('Macro updated', 'success');
     closeEditPanel();
   });
 }
