@@ -119,6 +119,8 @@ Floating panels use a `6px 6px 0` drop shadow; buttons `2px 2px 0`. Corners stay
 
 `@media (prefers-reduced-motion: reduce)`: no infinite animations, no panel/toast slide (just appear).
 
+**Speed rule (user decision 2026-10-03):** every transition is at most 160ms, and no animation ever blocks input: the user can click the next thing immediately. No countdown/progress animations for waits that the user didn't start (e.g. the 5s delete auto-cancel has no visible countdown).
+
 ---
 
 ## 3. Components
@@ -201,7 +203,7 @@ Bottom-center, cream fill, black text, border color by type (green success / blu
 
 Pure CSS, no assets:
 - **Recording:** a 12px red square that expands to 36px as a 2px hollow square ring in 4 steps and disappears (`240ms steps(4)`).
-- **Playback:** same ring in blue, plus four 4px "spark" squares that fly out diagonally 16px in 4 steps. The target element gets a `2px dashed var(--px-blue)` outline for 500ms (today: solid 3px blue).
+- **Playback:** same ring in blue, plus four 4px "spark" squares that fly out diagonally 16px in 4 steps, and a `2px dashed` blue box drawn over the target element for 500ms. The box is Fox's own overlay clipped to the viewport; the page element's style is never touched (changing it could leave the outline stuck when one element was hit twice within 500ms).
 
 ### 3.12 Scrollbars
 
@@ -210,6 +212,14 @@ Inside the panel (`::-webkit-scrollbar`): 10px wide, silver track, stone square 
 ### 3.13 Toolbar icon (no popup)
 
 Clicking the icon, or pressing the shortcut (`Alt+Shift+F`, `Option+Shift+F` on Mac; `_execute_action` in the manifest, user-changeable at `chrome://extensions/shortcuts`), toggles the panel on the current tab (`background.js`). The close button's tooltip shows the shortcut. On pages extensions can't touch (`chrome://`, the Web Store) the icon gets a `!` badge and the tooltip "Fox can't run on this page", scoped to that tab. The coffee link lives in Settings → About. The mascot `error` frame is kept in the sheet for a future error state but is unused for now.
+
+### 3.14 Positioning and stacking
+
+- All floating parts are `position: fixed` inside the shadow host and are kept inside the **visible** viewport: `document.documentElement.clientWidth/Height` (which excludes page scrollbars; `innerWidth` does not) with a 6px margin so the hard shadow is never cut (`moveTo` / `clampIntoView` in `content/utils.js`). They are re-clamped on window resize, after the panel changes size (recording mode, minimal mode, tab switch) and after restoring from the FAB.
+- The Inspector and the Edit panel open **next to the main panel** (`placeBesideMain`): to its left with a 12px gap, else to its right, else overlapping it at +24px. When one is already open, the second cascades 24px down and away from the main panel.
+- Stacking: panels share the shadow host's stacking context; the one last pressed is raised (`bringToFront`). Toasts and the FAB stay on top.
+- The click that ends a drag is swallowed wherever it lands, so dropping the panel never presses a button or records a page click.
+- Esc (while focus is inside Fox) closes the Edit panel, then the Inspector. The Inspector tab shows a pressed state while the Inspector is open.
 
 ---
 

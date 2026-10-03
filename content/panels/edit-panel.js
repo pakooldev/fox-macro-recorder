@@ -49,6 +49,8 @@ async function openEditPanel(id) {
 
   state.root.appendChild(panel);
   foxEditPanel = panel;
+  placeBesideMain(panel, foxInspectorPanel ? 24 : 0);
+  bringToFront(panel);
 
   makeDraggable(panel, panel.querySelector('.fox-edit-panel-header'));
   setupEditPanelResize(panel);

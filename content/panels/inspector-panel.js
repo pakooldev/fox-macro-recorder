@@ -19,6 +19,9 @@ function openInspectorPanel() {
   `;
 
   state.root.appendChild(foxInspectorPanel);
+  placeBesideMain(foxInspectorPanel, foxEditPanel ? 24 : 0);
+  bringToFront(foxInspectorPanel);
+  q('#fox-inspector-toggle').classList.add('pressed');
 
   // Make draggable by header
   makeDraggable(foxInspectorPanel, foxInspectorPanel.querySelector('.fox-inspector-panel-header'));
@@ -37,6 +40,7 @@ function closeInspectorPanel() {
     foxInspectorPanel.remove();
     foxInspectorPanel = null;
   }
+  q('#fox-inspector-toggle').classList.remove('pressed');
 }
 
 function toggleInspectorPanel() {

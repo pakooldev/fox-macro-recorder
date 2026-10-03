@@ -71,6 +71,7 @@ function renderMode() {
   }
 
   state.panel.classList.toggle('recording-mode', isRecording);
+  clampIntoView(state.panel); // it changes width between recording and normal mode
   foxFab?.classList.toggle('recording', isRecording);
   foxFab?.classList.toggle('playing', isPlaying && !isRecording);
 }
@@ -102,6 +103,16 @@ async function loadPixelFont() {
   loadPixelFont().catch(() => {});
   createPanel();
   createFab();
+
+  // Keep everything on screen when the window shrinks
+  window.addEventListener('resize', () => [state.panel, foxFab, foxEditPanel, foxInspectorPanel].forEach(clampIntoView));
+
+  // Esc closes the secondary panels (only while focus is inside Fox, so page shortcuts are untouched)
+  state.root.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (foxEditPanel) closeEditPanel();
+    else if (foxInspectorPanel) closeInspectorPanel();
+  });
   document.addEventListener('click', handleClick, true);
 
   loadSettings().then(settings => {

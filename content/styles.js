@@ -60,12 +60,13 @@ function getFoxStyles() {
       border: 2px solid var(--px-black);
       box-shadow: inset 2px 2px 0 var(--fox-bevel-hi), inset -2px -2px 0 var(--fox-bevel-lo), 6px 6px 0 var(--px-black);
       font: 16px/1.3 var(--fox-font-pixel);
-      z-index: 2147483647;
+      z-index: 1; /* inside the shadow host's stacking context; bringToFront() raises the one in use */
     }
 
     #fox-panel { top: 20px; right: 20px; width: 360px; min-width: 280px; max-height: 90vh; }
     #fox-panel.hidden { display: none; }
-    #fox-edit-panel { top: 60px; right: 400px; width: 340px; max-height: 80vh; }
+    /* edit/inspector are placed beside the main panel on open (placeBesideMain) */
+    #fox-edit-panel { top: 60px; left: 20px; width: min(340px, calc(100vw - 24px)); max-height: 80vh; }
     #fox-inspector-panel { top: 60px; left: 20px; width: 300px; max-height: 80vh; }
 
     /* Title bars */
@@ -83,7 +84,9 @@ function getFoxStyles() {
     .fox-header { background: var(--px-orange); box-shadow: inset 0 -2px 0 var(--px-brown); }
     .fox-edit-panel-header, .fox-inspector-panel-header { background: var(--px-silver); box-shadow: inset 0 -2px 0 var(--px-stone); }
 
-    .fox-header-left { display: flex; align-items: center; gap: 6px; }
+    /* left and right groups take equal slots: actions stay right-aligned (also in minimal
+       mode, where the tabs are hidden) and the tabs sit exactly in the middle */
+    .fox-header-left { display: flex; align-items: center; gap: 6px; flex: 1; }
     .fox-logo {
       width: 32px; height: 32px; flex: none;
       background: var(--fox-logo) no-repeat;
@@ -98,7 +101,8 @@ function getFoxStyles() {
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
-    .fox-tabs { display: flex; gap: 2px; margin: 0 auto; }
+    .fox-tabs { display: flex; gap: 2px; }
+    .fox-header-actions { flex: 1; justify-content: flex-end; }
     .fox-header-actions, .fox-edit-panel-actions { display: flex; align-items: center; gap: 2px; }
 
     .fox-tab-btn, .fox-icon-btn {
@@ -107,7 +111,7 @@ function getFoxStyles() {
       color: var(--px-black);
     }
     .fox-tab-btn:hover, .fox-icon-btn:hover { box-shadow: inset 0 0 0 2px var(--px-black); }
-    .fox-tab-btn.active { background: var(--fox-bg); color: var(--fox-text); box-shadow: inset 2px 2px 0 var(--fox-bevel-hi); }
+    .fox-tab-btn.active, .fox-tab-btn.pressed { background: var(--fox-bg); color: var(--fox-text); box-shadow: inset 2px 2px 0 var(--fox-bevel-hi); }
 
     /* Tabs */
     .fox-tab-content { display: none; flex: 1; min-height: 0; overflow-y: auto; }

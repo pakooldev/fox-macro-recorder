@@ -48,12 +48,67 @@ function compareDomains(a, b) {
 }
 
 // ==========================================
+// Positioning (fixed elements inside the shadow root)
+// ==========================================
+const EDGE = 6; // keep the hard shadow on screen too
+
+// The visible area: clientWidth/Height leave out the page's scrollbars (innerWidth doesn't)
+function viewport() {
+  return { width: document.documentElement.clientWidth, height: document.documentElement.clientHeight };
+}
+
+function moveTo(element, left, top) {
+  const { width, height } = viewport();
+  Object.assign(element.style, {
+    left: `${Math.min(Math.max(0, left), Math.max(0, width - element.offsetWidth - EDGE))}px`,
+    top: `${Math.min(Math.max(0, top), Math.max(0, height - element.offsetHeight - EDGE))}px`,
+    right: 'auto',
+    bottom: 'auto'
+  });
+}
+
+// Pull a (visible) element back on screen, e.g. after it grew or the window shrank
+function clampIntoView(element) {
+  if (!element?.isConnected || !element.offsetWidth) return;
+  const r = element.getBoundingClientRect();
+  const { width, height } = viewport();
+  if (r.left < 0 || r.top < 0 || r.right > width - EDGE || r.bottom > height - EDGE) moveTo(element, r.left, r.top);
+}
+
+// Open a floating panel next to the main panel: left of it, else right of it, else
+// overlapping it with an offset. `cascade` shifts it when another one already sits there.
+function placeBesideMain(element, cascade = 0) {
+  const main = state.panel.getBoundingClientRect();
+  const gap = 12;
+  const { width } = viewport();
+  const w = element.offsetWidth;
+  let top = main.top + cascade;
+  let left = main.left - gap - w - cascade;                   // left of the panel, cascading away from it
+  if (left < 0) left = main.right + gap + cascade;            // else right of it
+  if (left + w > width - EDGE) {                              // else on top of it, offset
+    left = main.left + 24 + cascade;
+    top = main.top + 24 + cascade;
+  }
+  moveTo(element, left, top);
+}
+
+// All our floating parts share one stacking context (the shadow host): the last one
+// touched goes on top
+let foxTopZ = 10;
+function bringToFront(element) {
+  element.style.zIndex = ++foxTopZ;
+}
+
+// ==========================================
 // Dragging
 // ==========================================
-// Drags `element` by `handle`. A click right after a drag is swallowed, so a
-// draggable button (the FAB) doesn't fire when it is dropped.
+// Drags `element` by `handle`. The click that ends a drag is swallowed wherever it
+// lands: on a draggable button (the FAB) it would fire it, and when the pointer is
+// released off the panel Chrome sends it to the page, where recording would save it.
 function makeDraggable(element, handle = element) {
   let start = null, offsetX = 0, offsetY = 0, dragged = false;
+
+  element.addEventListener('pointerdown', () => bringToFront(element), true);
 
   handle.addEventListener('mousedown', (e) => {
     dragged = false;
@@ -69,25 +124,20 @@ function makeDraggable(element, handle = element) {
   document.addEventListener('mousemove', (e) => {
     if (!start) return;
     if (Math.abs(e.clientX - start.x) > 3 || Math.abs(e.clientY - start.y) > 3) dragged = true;
-    // Keep it fully on screen so its header can always be grabbed again
-    const maxX = Math.max(0, window.innerWidth - element.offsetWidth);
-    const maxY = Math.max(0, window.innerHeight - element.offsetHeight);
-    Object.assign(element.style, {
-      left: `${Math.min(Math.max(0, e.clientX - offsetX), maxX)}px`,
-      top: `${Math.min(Math.max(0, e.clientY - offsetY), maxY)}px`,
-      right: 'auto',
-      bottom: 'auto'
-    });
+    moveTo(element, e.clientX - offsetX, e.clientY - offsetY);
   });
 
-  document.addEventListener('mouseup', () => { start = null; });
-
-  element.addEventListener('click', (e) => {
-    if (dragged) {
-      e.stopImmediatePropagation();
-      dragged = false;
-    }
-  }, true);
+  document.addEventListener('mouseup', () => {
+    start = null;
+    if (!dragged) return;
+    dragged = false;
+    // The click (if any) is dispatched right after this mouseup, before any timer, so
+    // a one-shot window capture listener catches it before anything else sees it
+    // (including recording) and the next real click is never affected.
+    const swallow = (e) => { e.stopImmediatePropagation(); e.preventDefault(); };
+    window.addEventListener('click', swallow, true);
+    setTimeout(() => window.removeEventListener('click', swallow, true), 0);
+  });
 }
 
 // ==========================================
@@ -150,7 +200,7 @@ function showClickFeedback(x, y, color, isPlayback = false) {
 
   const spawn = (css) => {
     const el = document.createElement('div');
-    el.style.cssText = `position: fixed; left: ${x}px; top: ${y}px; pointer-events: none; z-index: 2147483646; ${css}`;
+    el.style.cssText = `position: fixed; left: ${x}px; top: ${y}px; box-sizing: border-box; pointer-events: none; z-index: 2147483646; ${css}`;
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 320);
   };
@@ -163,8 +213,27 @@ function showClickFeedback(x, y, color, isPlayback = false) {
   }
 }
 
+// Dashed box over the element a playback click hit. Drawn as our own overlay, never
+// by changing the page element's style (that could stick if one element was hit twice
+// within the timeout, and page CSS could fight it). Clipped to the viewport.
+function showTargetOutline(element) {
+  const r = element.getBoundingClientRect();
+  const { width, height } = viewport();
+  const left = Math.max(0, r.left), top = Math.max(0, r.top);
+  const box = document.createElement('div');
+  box.style.cssText = `
+    position: fixed; left: ${left}px; top: ${top}px;
+    width: ${Math.max(0, Math.min(r.right, width) - left)}px; height: ${Math.max(0, Math.min(r.bottom, height) - top)}px;
+    box-sizing: border-box; border: 2px dashed #29ADFF;
+    pointer-events: none; z-index: 2147483646;
+  `;
+  document.body.appendChild(box);
+  setTimeout(() => box.remove(), 500);
+}
+
 function switchTab(tabName) {
   state.activeTab = tabName;
   qa('.fox-tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tabName));
   qa('.fox-tab-content').forEach(content => content.classList.toggle('active', content.dataset.tab === tabName));
+  clampIntoView(state.panel);
 }

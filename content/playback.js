@@ -78,18 +78,12 @@ async function playActions(actions, currentLoop, totalLoops) {
 }
 
 function simulateClick({ x, y }) {
-  showClickFeedback(x, y, '#3B82F6', true);
+  showClickFeedback(x, y, '#29ADFF', true);
 
   const element = document.elementFromPoint(x, y);
   if (!element) return;
 
-  const { outline, transition } = element.style;
-  element.style.transition = 'outline 0.2s';
-  element.style.outline = '2px dashed #29ADFF';
-  setTimeout(() => {
-    element.style.outline = outline;
-    element.style.transition = transition;
-  }, 500);
+  showTargetOutline(element);
 
   ['mousedown', 'mouseup', 'click'].forEach(type => {
     element.dispatchEvent(new MouseEvent(type, {

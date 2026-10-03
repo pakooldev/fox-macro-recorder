@@ -43,6 +43,21 @@ async function showPendingNotice(tabId) {
   await chrome.tabs.sendMessage(tabId, { action: 'notice', text });
 }
 
+function flagTab(tabId, text) {
+  chrome.action.setBadgeText({ tabId, text: '!' });
+  chrome.action.setTitle({ tabId, title: text });
+}
+
+// The interruption is reported from the old page's pagehide, which can land before the
+// new page commits (and the navigation resets tab-specific badges), so flag it again
+// once the new page has loaded
+chrome.tabs.onUpdated.addListener(async (tabId, info) => {
+  if (info.status !== 'complete') return;
+  const key = noticeKey(tabId);
+  const text = (await chrome.storage.session.get(key))[key];
+  if (text) flagTab(tabId, text);
+});
+
 chrome.tabs.onRemoved.addListener(tabId => chrome.storage.session.remove(noticeKey(tabId)));
 
 chrome.action.onClicked.addListener(async (tab) => {
@@ -62,8 +77,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'interrupted' && sender.tab) {
     const tabId = sender.tab.id;
     chrome.storage.session.set({ [noticeKey(tabId)]: message.text });
-    chrome.action.setBadgeText({ tabId, text: '!' });
-    chrome.action.setTitle({ tabId, title: message.text });
+    flagTab(tabId, message.text);
     return;
   }
   if (message.action !== 'getShortcut') return;

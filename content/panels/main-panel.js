@@ -100,6 +100,7 @@ function bindPanelEvents() {
 
   minimalBtn.addEventListener('click', () => {
     const minimal = state.panel.classList.toggle('minimal-mode');
+    clampIntoView(state.panel);
     minimalBtn.title = minimal ? 'Full mode' : 'Minimal mode';
   });
   q('#fox-minimize-btn').addEventListener('click', minimizePanel);

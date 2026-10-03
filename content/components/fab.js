@@ -27,4 +27,5 @@ function expandPanel() {
   state.panel.classList.remove('hidden');
   state.isPanelMinimized = false;
   hideFab();
+  clampIntoView(state.panel);
 }

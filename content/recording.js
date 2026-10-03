@@ -23,7 +23,7 @@ function handleClick(event) {
   const countEl = q('.fox-rec-count');
   if (countEl) countEl.textContent = state.recordedActions.length;
 
-  showClickFeedback(event.clientX, event.clientY, '#EF4444');
+  showClickFeedback(event.clientX, event.clientY, '#FF004D');
 }
 
 // An unsaved recording blocks a new one: save or discard it first

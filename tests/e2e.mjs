@@ -149,6 +149,83 @@ try {
     assert(box.x >= 0 && box.y >= 0, JSON.stringify(box));
   });
 
+  // ---- UX review 2 (reviews/2026-10-03-ux-review-2.md), round 1 ----
+  const rect = (sel) => page.locator(sel).boundingBox();
+  const clientWidth = () => page.evaluate(() => document.documentElement.clientWidth);
+
+  await check('H1: dragged flush right, the panel stays clear of the page scrollbar', async () => {
+    const h = await rect('.fox-title');
+    await page.mouse.move(h.x + 5, h.y + 5);
+    await page.mouse.down();
+    await page.mouse.move(await clientWidth() - 2, h.y + 5, { steps: 4 }); // past the clamp, still inside the page
+    await page.mouse.up();
+    const box = await rect('#fox-panel');
+    assert(box.x + box.width <= await clientWidth() - 4, `panel right ${box.x + box.width} vs clientWidth ${await clientWidth()}`);
+  });
+
+  await check('H3: a drag released off the panel does not eat the next click', async () => {
+    // pointer ran past the clamped panel, so the mouseup/click happened elsewhere
+    await page.click('#fox-minimal-btn');
+    assert(await page.locator('#fox-panel.minimal-mode').count() === 1, 'minimal toggle click was swallowed');
+  });
+
+  await check('2.1: in minimal mode the title-bar buttons stay right-aligned', async () => {
+    const panel = await rect('#fox-panel');
+    const actions = await rect('.fox-header-actions');
+    assert(panel.x + panel.width - (actions.x + actions.width) < 12, `gap ${panel.x + panel.width - (actions.x + actions.width)}`);
+    await page.click('#fox-minimal-btn');
+  });
+
+  await check('H2: after recording in the narrow mode, the full panel is pulled back on screen; the drag recorded nothing', async () => {
+    await page.click('#fox-record-btn');
+    const h = await rect('.fox-title');
+    await page.mouse.move(h.x + 5, h.y + 5);
+    await page.mouse.down();
+    await page.mouse.move(await clientWidth() - 2, h.y + 5, { steps: 4 });
+    await page.mouse.up(); // released on the page: must not be recorded as a click
+    await page.click('#fox-stop-btn');
+    const box = await rect('#fox-panel');
+    assert(box.x >= 0 && box.x + box.width <= await clientWidth(), JSON.stringify(box));
+    assert.equal(await toastText(page), 'Nothing recorded');
+  });
+
+  await check('2.2: playback never leaves a dashed outline on the page', async () => {
+    await sw.evaluate(() => chrome.storage.local.get({ macros: [] }).then(({ macros }) => chrome.storage.local.set({
+      macros: [...macros, { id: 'twice', name: 'Same button twice', domain: 'localhost', actions: [{ x: 450, y: 320, timestamp: 0 }, { x: 450, y: 320, timestamp: 100 }] }]
+    })));
+    await page.waitForSelector('.fox-macro-card[data-id="twice"]');
+    await page.click('.fox-macro-card[data-id="twice"] [data-action="play"]');
+    await page.waitForSelector('.fox-macro-card[data-id="twice"] .fox-abtn-play', { timeout: 5000 });
+    await page.waitForTimeout(700);
+    assert.equal(await page.evaluate(() => document.getElementById('b').style.outline), '');
+    assert.equal(await page.evaluate(() => [...document.body.children].filter(e => e.style.border.includes('dashed')).length), 0);
+    await page.locator('.fox-macro-card[data-id="twice"] [data-action="delete"]').click();
+    await page.click('[data-action="confirm-delete"]');
+  });
+
+  await check('2.3: inspector and edit panel open next to the main panel; Esc closes them', async () => {
+    await page.click('#fox-inspector-toggle');
+    assert.equal(await page.locator('#fox-inspector-toggle.pressed').count(), 1);
+    const main = await rect('#fox-panel');
+    const insp = await rect('#fox-inspector-panel');
+    assert(Math.abs(insp.x + insp.width + 12 - main.x) <= 2 || Math.abs(main.x + main.width + 12 - insp.x) <= 2, `inspector at ${insp.x}, main at ${main.x}`);
+    await page.click('#fox-inspector-close');
+    assert.equal(await page.locator('#fox-inspector-toggle.pressed').count(), 0);
+    await page.locator('[data-action="edit"]').first().click();
+    const edit = await rect('#fox-edit-panel');
+    assert(Math.abs(edit.y - main.y) <= 2 && edit.x + edit.width <= main.x, `edit at ${edit.x},${edit.y}`);
+    await page.focus('#fox-edit-name');
+    await page.keyboard.press('Escape');
+    await page.waitForSelector('#fox-edit-panel', { state: 'detached' });
+    // both open: the second one cascades, still clear of the main panel
+    await page.click('#fox-inspector-toggle');
+    await page.locator('[data-action="edit"]').first().click();
+    const edit2 = await rect('#fox-edit-panel');
+    assert(edit2.x + edit2.width <= main.x, `edit overlaps main: ${edit2.x + edit2.width} > ${main.x}`);
+    await page.click('#fox-edit-close');
+    await page.click('#fox-inspector-close');
+  });
+
   await check('B4: minimize, drag the FAB from its middle, then restore', async () => {
     await page.click('#fox-minimize-btn');
     const before = await page.locator('#fox-fab').boundingBox();
@@ -205,9 +282,15 @@ try {
     await page.click('#fox-record-btn');
     await page.click('#nav');
     await page.waitForURL(/page=2/);
+    // background.js sets the badge asynchronously after the old page's pagehide
     const badge = await sw.evaluate(async (url) => {
       const [tab] = await chrome.tabs.query({ url });
-      return chrome.action.getBadgeText({ tabId: tab.id });
+      for (let i = 0; i < 20; i++) {
+        const text = await chrome.action.getBadgeText({ tabId: tab.id });
+        if (text) return text;
+        await new Promise(r => setTimeout(r, 100));
+      }
+      return '';
     }, page.url());
     assert.equal(badge, '!');
     await clickIcon(page);

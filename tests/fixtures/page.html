@@ -1,6 +1,9 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><title>Fox e2e page</title></head>
+<head><meta charset="utf-8"><title>Fox e2e page</title>
+<!-- a classic (space-taking) 15px scrollbar, like Windows: Fox must stay left of it -->
+<style>html { overflow-y: scroll; } ::-webkit-scrollbar { width: 15px; background: #ddd; }</style>
+</head>
 <body style="height: 100vh; margin: 0; font-family: sans-serif;">
   <!-- Button text looks like HTML: recorded page text must never become markup -->
   <button id="a" style="position:absolute;left:100px;top:300px;width:200px;height:40px">&lt;img src=x onerror="window.__xss=1"&gt;</button>
