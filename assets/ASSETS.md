@@ -169,7 +169,7 @@ The site (`website/`) reuses everything above: the mascot sheet, logo, icons, fo
 
 | # | File (raw) | Art grid | Final output | Used on |
 |---|---|---|---|---|
-| W1 | `web-moving.png` | ~96×64 art pixels | `assets/web/moving.png` (transparent, shown at 2× or 3×) | `/moved` page header, "Fox moved house" |
+| W1 | `web-moving.png` | ~96×64 art pixels | `assets/web/moving.png` (115×66, night sky kept, shown at 4× / 3×) | `/moved` page header, "Fox moved house" |
 
 ### W1: Fox moving house
 

@@ -223,6 +223,7 @@ def save(idx, palette, path, scale=1):
 
 # ---------------------------------------------------------------- build
 
+WEB_NIGHT = [0x12, 0x29, 0x65]  # website --web-night (sampled from the marquee sky)
 MASCOT = [('idle', 2), ('record', 2), ('play', 4), ('success', 1), ('error', 1), ('sleep', 2)]
 OUT = ROOT / 'sprites'
 ICONS = ROOT.parent / 'icons'
@@ -268,6 +269,24 @@ def build():
     for raw, out, size in [('promo-small', 'promo-small-440x280.png', (440, 280)),
                            ('promo-marquee', 'promo-marquee-1400x560.png', (1400, 560))]:
         Image.open(RAW / f'{raw}.png').convert('RGB').resize(size, Image.Resampling.LANCZOS).save(ROOT / 'store' / out)
+
+    # Website art (ASSETS.md W1): a night-sky scene shown like the landing hero, so the
+    # navy backdrop stays (the dark-blue cursors on the cards would vanish with it);
+    # it is flattened to the hero's --web-night and the empty sky cropped to 4 cells
+    if (RAW / 'web-moving.png').exists():
+        scene = load_cells('web-moving')[0]
+        sky = is_background(scene)
+        q = Image.fromarray(scene[~sky].astype(np.uint8)[None], 'RGB').quantize(colors=32, method=Image.Quantize.MEDIANCUT, kmeans=4)
+        scene_pal = np.vstack([WEB_NIGHT, np.array(q.getpalette()[:96], dtype=float).reshape(32, 3)])
+        idx = snap(scene, scene_pal[1:]) + 1
+        idx[sky] = 0
+        y0, y1, x0, x1 = bbox(idx != 0)
+        y0, x0 = max(0, y0 - 4), max(0, x0 - 4)
+        y1, x1 = min(idx.shape[0], y1 + 4), min(idx.shape[1], x1 + 4)
+        im = Image.fromarray(scene_pal[idx[y0:y1, x0:x1]].astype(np.uint8), 'RGB')
+        (ROOT / 'web').mkdir(exist_ok=True)
+        im.save(ROOT / 'web' / 'moving.png', optimize=True)
+        print(f'web/moving.png: {im.width}x{im.height}')
 
     print(f'mascot.png: frames {fw}x{fh}, {cols} columns, rows', ', '.join(f'{s}({n})' for s, n in MASCOT))
     print(f'logo.png: {side}x{side}; detail head {detail.shape[1]}x{detail.shape[0]}')

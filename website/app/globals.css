@@ -171,7 +171,9 @@ kbd {
 .prose li + li { margin-top: 4px; }
 
 /* /moved */
-.moved-art { width: min(100%, 480px); image-rendering: pixelated; }
+/* 115×66 art at whole-pixel scales (4×, 3× on phones), on its own night sky like the hero */
+.moved-art { width: 460px; max-width: 100%; height: auto; image-rendering: pixelated; border: 2px solid var(--px-black); box-shadow: 4px 4px 0 var(--px-black); background: var(--web-night); margin-bottom: 12px; }
+@media (max-width: 520px) { .moved-art { width: 345px; } }
 .howto { display: grid; gap: 16px; margin: 0 0 32px; padding: 0; list-style: none; counter-reset: howto; max-width: 760px; }
 .howto li { display: grid; grid-template-columns: 48px 1fr; gap: 16px; padding: 20px; counter-increment: howto; }
 .howto li::before {

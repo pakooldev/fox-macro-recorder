@@ -17,7 +17,7 @@ export default function Moved() {
     <main className="container">
       <div className="page-head">
         {hasArt ? (
-          <img className="moved-art" src="/assets/web/moving.png" alt="The fox carrying a moving box to its new house" />
+          <img className="moved-art" src="/assets/web/moving.png" width={460} height={264} alt="The fox carrying a moving box to its new house" />
         ) : (
           <Mascot state="play" big />
         )}
