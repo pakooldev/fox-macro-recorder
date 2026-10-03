@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Fox Macro Recorder",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "description": "Create and run browser macros to automate repetitive web tasks.",
   "permissions": [
     "storage",

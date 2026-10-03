@@ -159,7 +159,7 @@ Both are already in the repo; nothing to do here.
 
 | Item | Size | How |
 |---|---|---|
-| Store screenshots (1–5) | 1280×800 | Playwright on a demo page: panel with a few macros, recording in progress, playback with ripples, edit panel, popup |
+| Store screenshots (1–4) | 1280×800 | Done 2026-10-04: `website/scripts/store-shots.mjs` drives the real extension on the site's /playground/ (record, loop playback, macros by site, settings) and frames each shot with a caption; it also writes the promo tiles with their title (`*-title.png`) |
 
 ---
 
@@ -190,4 +190,4 @@ Done 2026-10-03: `clean.py` reads it on a ~13px grid, keeps the sky (flattened t
 - [x] D1 font + OFL.txt → `assets/fonts/`
 - [x] D2 icons + LICENSE → `assets/icons-src/`
 - [x] Claude: clean up, build `assets/sprites/mascot.png`, `icons/icon16|48|128.png`, promo tiles
-- [ ] Capture store screenshots after the refactor
+- [x] Capture store screenshots after the refactor (`assets/store/screenshots/`, see STORE_LISTING.md)

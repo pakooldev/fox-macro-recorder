@@ -2,15 +2,15 @@
 
 > Cleverly record and replay your clicks like a sly fox - automate repetitive tasks with precision!
 
-[![Version](https://img.shields.io/badge/version-2.0.0-blue?style=for-the-badge)](https://github.com/panat54083/fox-macro-recorder)
-[![Vibe Coding Project](https://img.shields.io/badge/vibe-coding%20project-ff69b4?style=for-the-badge)](https://github.com/panat54083/fox-macro-recorder)
+[![Version](https://img.shields.io/badge/version-3.0.0-blue?style=for-the-badge)](https://github.com/pakooldev/fox-macro-recorder)
+[![Vibe Coding Project](https://img.shields.io/badge/vibe-coding%20project-ff69b4?style=for-the-badge)](https://github.com/pakooldev/fox-macro-recorder)
 
 **Note:** This is a vibe coding project - built for fun, experimentation, and learning! While it's fully functional, it was created with a focus on exploring ideas and enjoying the development process. 🎨✨
 
 ---
 
 ## 📋 Table of Contents
-- [What's New](#-whats-new-in-v200)
+- [What's New](#-whats-new-in-v300)
 - [Single Purpose](#single-purpose)
 - [What is Fox Macro Recorder?](#what-is-fox-macro-recorder)
 - [Complete Features List](#complete-features-list) ⭐ **60+ Features**
@@ -24,14 +24,15 @@
 
 ---
 
-## 🆕 What's New in v2.0.0
+## 🆕 What's New in v3.0.0
 
-- **🌐 Domain-Based Macro Organization**: Macros now store a domain field (auto-detected from current page), grouped by domain in the macro list with a filter dropdown
-- **🔲 Minimal Mode**: Toggle button to show only the control bar (record, stop, select, play) for a compact footprint
-- **↔️ Edit Panel Resize**: Dual corner grips (bottom-left and bottom-right) with correct anchoring for intuitive resizing
-- **🪟 Floating Panel Architecture**: Edit and inspector panels are now standalone draggable floating panels
-- **⏺️ Recording Mode**: Minimal panel during recording showing only status and stop button
-- **🧹 Streamlined UI**: Removed export/import features, cleaned up dead code
+Fox Auto Clicker is now **Fox Macro Recorder** on a new Chrome Web Store listing ([how to move your macros](https://fox-macro.pakool.com/moved/)). Full list: [RELEASE_NOTES_v3.0.0.md](RELEASE_NOTES_v3.0.0.md).
+
+- **🎮 Pixel Fox redesign**: light pixel-art theme, pixel font and icons, an animated fox mascot
+- **🖱️ Toolbar icon / Alt+Shift+F** shows or hides the panel on the current page (no popup)
+- **📦 Export and import** are back (Settings → Macros), including files from older versions
+- **🛡️ Safer**: unsaved recordings are kept, navigation cancels a run with a notice, Stop also cuts loop delays
+- **🔒 Less access**: nothing runs on a page until you open Fox there
 
 ## Single Purpose
 
@@ -338,9 +339,10 @@ fox-macro-recorder/
 
 ## Version
 
-**Current Version**: 2.0.0
+**Current Version**: 3.0.0
 
 ### Version History
+- **v3.0.0** (2026-10-04): Renamed to Fox Macro Recorder on a new listing; Pixel Fox redesign, toolbar-icon panel + shortcut, export/import, on-demand injection
 - **v2.0.0** (2026-02-07): Domain-based macro organization, minimal mode, edit panel resize, floating panels, UI streamlining
 - **v1.1.0** (2026-01-28): Settings panel, UI improvements, code refactoring
 - **v1.0.0** (2026-01): Initial release
