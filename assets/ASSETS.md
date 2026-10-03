@@ -175,7 +175,7 @@ The site (`website/`) reuses everything above: the mascot sheet, logo, icons, fo
 
 > Using the attached fox as the exact character design: one pixel art scene, about 96×64 art pixels shown greatly enlarged. The fox walks to the right carrying a cardboard moving box (#AB5236 / #FFCCAA tape) on its head with both front paws, tail up and happy. Behind it on the left a small old dark-grey (#5F574F) house with a "for rent" style blank sign (no text); ahead on the right a small new house with an orange (#FFA300) roof and a lit yellow (#FFEC27) window. Two or three tiny macro cards (cream squares with a blue cursor and a red target, like inventory slots) float out of the box. A short dotted path joins the two houses. [style block] (keep the plain removable background)
 
-If it doesn't come out well the page simply shows the mascot's play row (running fox) instead, so this is optional.
+Done 2026-10-03: `clean.py` reads it on a ~13px grid, keeps the sky (flattened to the site's `--web-night`; removing it also removed the dark-blue cursors on the cards), uses its own 32-color scene palette and crops the empty sky. Without the file, `/moved` shows the running mascot instead.
 
 - [x] W1 → `assets/raw/web-moving.png`
 
