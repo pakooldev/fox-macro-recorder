@@ -23,6 +23,14 @@ function createPanel() {
       </div>
     </div>
 
+    <div class="fox-moved-banner">
+      <span class="fox-moved-text">\uD83D\uDCE6 Fox has moved! Fox Auto Clicker is now <b>Fox Macro Recorder</b>.</span>
+      <div class="fox-moved-actions">
+        <button class="fox-moved-btn" id="fox-moved-export">Export macros</button>
+        <a class="fox-moved-link" id="fox-moved-link" target="_blank" rel="noopener">How to move \u2192</a>
+      </div>
+    </div>
+
     <!-- Home Tab -->
     <div class="fox-tab-content active" data-tab="home">
       <div class="fox-control-bar">
@@ -80,6 +88,13 @@ function createPanel() {
 }
 
 function bindPanelEvents() {
+  // "Fox has moved" banner (migrate.js)
+  foxShadowRoot.querySelector('#fox-moved-link').href = FOX_MOVED_URL;
+  foxShadowRoot.querySelector('#fox-moved-export').addEventListener('click', async () => {
+    const count = await exportMacrosFile();
+    showToast(count ? `Exported ${count} macro${count === 1 ? '' : 's'}` : 'No macros to export', count ? 'success' : 'info');
+  });
+
   const recordBtn = foxShadowRoot.querySelector('#fox-record-btn');
   const stopBtn = foxShadowRoot.querySelector('#fox-stop-btn');
   const saveBtn = foxShadowRoot.querySelector('#fox-save-btn');

@@ -217,6 +217,54 @@ function getFoxStyles() {
     }
 
     /* ==========================================
+       "Fox has moved" banner (2.0.2)
+       ========================================== */
+    .fox-moved-banner {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--fox-orange-light);
+      border-bottom: 1px solid var(--fox-orange);
+      font-size: 13px;
+      line-height: 1.4;
+      color: var(--fox-gray-900);
+      flex-shrink: 0;
+    }
+
+    .fox-moved-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .fox-moved-btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 8px;
+      background: var(--fox-primary);
+      color: var(--fox-white);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .fox-moved-btn:hover { background: var(--fox-primary-hover); }
+
+    .fox-moved-link {
+      color: var(--fox-primary-hover);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .fox-moved-link:hover { text-decoration: underline; }
+
+    #fox-panel.minimal-mode .fox-moved-banner,
+    #fox-panel.recording-mode .fox-moved-banner {
+      display: none;
+    }
+
+    /* ==========================================
        Tab Content
        ========================================== */
     .fox-tab-content {

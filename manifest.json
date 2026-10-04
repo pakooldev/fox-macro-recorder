@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Fox Auto Clicker",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Create and run browser macros to automate repetitive web tasks.",
   "permissions": [
     "storage"
@@ -20,6 +20,7 @@
       "js": [
         "fox-styles.js",
         "utils.js",
+        "migrate.js",
         "components/toast.js",
         "components/fab.js",
         "recording.js",

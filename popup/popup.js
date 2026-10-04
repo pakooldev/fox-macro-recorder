@@ -39,3 +39,12 @@ toggleBtn.addEventListener('click', async () => {
     showMessage('Refresh page', true);
   }
 });
+
+// "Fox has moved" (migrate.js)
+document.getElementById('movedLink').href = FOX_MOVED_URL;
+document.getElementById('exportBtn').addEventListener('click', async () => {
+  const note = document.getElementById('exportNote');
+  const count = await exportMacrosFile();
+  note.textContent = count ? `Saved ${count} macro${count === 1 ? '' : 's'} to Downloads.` : 'No macros to export.';
+  note.hidden = false;
+});
