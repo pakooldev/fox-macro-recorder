@@ -24,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <head>
         <link rel="preload" href="/assets/fonts/tiny5.woff2" as="font" type="font/woff2" crossOrigin="" />
+        <link rel="preload" href="/fonts/departure-mono.woff2" as="font" type="font/woff2" crossOrigin="" />
       </head>
       <body>
         <Navbar />

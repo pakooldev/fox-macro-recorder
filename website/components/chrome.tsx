@@ -42,7 +42,7 @@ export function Footer() {
     <footer className="footer">
       <div className="container footer-inner">
         <p>
-          {APP_NAME} v{VERSION} · © {new Date().getFullYear()}
+          {APP_NAME} v{VERSION} · {new Date().getFullYear()}
         </p>
         <nav className="footer-links" aria-label="Footer">
           <Link href="/privacy/">Privacy</Link>

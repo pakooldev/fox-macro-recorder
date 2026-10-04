@@ -2,6 +2,14 @@
    extension (generated/fox-shared.css, see scripts/sync-design.mjs); this file only
    lays out pages with them, following DESIGN.md (§6 Website). */
 
+/* Site-only body font: Departure Mono (OFL, public/fonts/DepartureMono-LICENSE.txt).
+   Drawn on an 11px pixel grid, so sizes are multiples of 5.5px (16.5 = 1.5×11). */
+@font-face {
+  font-family: "DepartureMono";
+  src: url("/fonts/departure-mono.woff2") format("woff2");
+  font-display: swap;
+}
+
 @font-face {
   font-family: "FoxPixel";
   src: url("/assets/fonts/tiny5.woff2") format("woff2");
@@ -13,6 +21,7 @@
      hero band continues it seamlessly on wide screens) */
   --web-night: #122965;
   --web-max: 1120px;
+  --web-font-body: "DepartureMono", var(--fox-font-ui);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -21,13 +30,16 @@ body {
   margin: 0;
   background: var(--fox-bg);
   color: var(--fox-text);
-  font: 17px/1.6 var(--fox-font-ui);
+  font: 16.5px/1.6 var(--web-font-body);
 }
 img { max-width: 100%; display: block; }
 a { color: var(--fox-link); text-underline-offset: 3px; }
+/* the body font has one weight: emphasis is a highlight, never a faux bold */
+strong, b { font-weight: normal; color: var(--px-black); background: var(--px-peach); padding: 0 3px; }
+.hero strong, .prose strong { background: none; padding: 0; }
 a:hover { color: var(--px-black); }
 :focus-visible { outline: 2px solid var(--px-orange); outline-offset: 2px; }
-code { font: 0.9em var(--fox-font-mono); background: var(--fox-surface); border: 2px solid var(--px-silver); padding: 0 4px; }
+code { font: inherit; background: var(--fox-surface); border: 2px solid var(--px-silver); padding: 0 4px; }
 
 h1, h2, h3, .pixel {
   font-family: var(--fox-font-pixel);
@@ -110,7 +122,7 @@ kbd {
   .nav-links .narrow { display: inline; }
 }
 
-.footer { border-top: 2px solid var(--px-black); padding: 24px 0; color: var(--fox-text-2); font-size: 15px; }
+.footer { border-top: 2px solid var(--px-black); padding: 24px 0; color: var(--fox-text-2); }
 .footer-inner { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; align-items: center; }
 .footer-inner p { margin: 0; }
 .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
@@ -124,7 +136,7 @@ kbd {
   display: flex; flex-direction: column; justify-content: center; gap: 20px;
   padding: 24px 16px 24px max(16px, calc((100vw - var(--web-max)) / 2 + 16px));
 }
-.hero-copy p { margin: 0; font-size: 18px; max-width: 34ch; color: var(--px-cream); }
+.hero-copy p { margin: 0; max-width: 40ch; color: var(--px-cream); }
 .hero-copy .label { color: var(--px-peach); }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
 .hero .btn.is-disabled { color: var(--px-cream); border-color: var(--px-cream); background: transparent; }
@@ -161,7 +173,7 @@ kbd {
 @media (max-width: 800px) {
   .demo { grid-template-columns: 1fr; }
   .steps { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-  .steps li { flex-direction: column; align-items: start; gap: 4px; font-size: 15px; }
+  .steps li { flex-direction: column; align-items: start; gap: 4px; font-size: 13.75px; }
   .step-title { font-size: 20px; }
 }
 
@@ -182,7 +194,7 @@ kbd {
 
 /* ---------- Text pages (privacy, moved) ---------- */
 .page-head { padding: 56px 0 32px; display: grid; gap: 12px; }
-.page-head p { margin: 0; max-width: 60ch; color: var(--fox-text-2); font-size: 18px; }
+.page-head p { margin: 0; max-width: 60ch; color: var(--fox-text-2); }
 .prose { overflow-wrap: anywhere; max-width: 760px; padding: 32px; margin-bottom: 72px; }
 .prose h1 { display: none; } /* the page head already shows the title */
 .prose h2 { font-size: 24px; margin: 32px 0 8px; }
