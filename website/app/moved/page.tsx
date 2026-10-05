@@ -55,7 +55,10 @@ export default function Moved() {
       <section className="faq">
         <details className="raised">
           <summary>I don’t see Export in the old Fox</summary>
-          <p>Open chrome://extensions, turn on Developer mode, press Update.</p>
+          <p>
+            Chrome updates it on its own, usually within a few hours. Then reload the page you’re on.
+            In a hurry? Open chrome://extensions, turn on Developer mode, press Update.
+          </p>
         </details>
         <details className="raised">
           <summary>Why a new install?</summary>
