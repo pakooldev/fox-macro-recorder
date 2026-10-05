@@ -1,6 +1,6 @@
 import meta from "@/generated/meta.json";
 
 export const SITE_URL = "https://fox-macro.pakool.com";
-// Set once the new listing exists; until then the buttons say "Coming soon".
-export const STORE_URL: string | null = null;
+// Chrome Web Store listing (null would show "Coming soon" on the buttons)
+export const STORE_URL: string | null = "https://chromewebstore.google.com/detail/mkckkggnhfncbmpnjebalopconahilam";
 export const { name: APP_NAME, version: VERSION, shortcut: SHORTCUT } = meta;
