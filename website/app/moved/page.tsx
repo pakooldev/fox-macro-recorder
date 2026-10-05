@@ -36,8 +36,9 @@ export default function Moved() {
           <div>
             <h2>Export from the old Fox</h2>
             <p>
-              Open the old Fox and press <strong>Export macros</strong>.
+              Click the old Fox’s toolbar icon and press <strong>Export macros</strong>.
             </p>
+            <img className="howto-shot" src="/assets/web/export-old.png" width={236} height={235} alt="The Export macros button in the old Fox's popup" />
           </div>
         </li>
         <li className="raised">

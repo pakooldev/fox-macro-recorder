@@ -2,6 +2,7 @@
 // visible change to the panel):   cd website && npm run build && node scripts/capture.mjs
 //   assets/web/panel.png   playground tiles + the panel playing a macro (landing page)
 //   assets/web/import.png  Settings -> Macros with Import marked (/moved/ step 3)
+// (/moved/ step 2, the OLD extension, is scripts/capture-legacy.mjs)
 import { join } from "node:path";
 import { launchFox, root } from "./fox-browser.mjs";
 
