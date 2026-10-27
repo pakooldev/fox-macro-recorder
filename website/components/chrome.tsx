@@ -46,6 +46,9 @@ export function Footer() {
         </p>
         <nav className="footer-links" aria-label="Footer">
           <Link href="/privacy/">Privacy</Link>
+          <a href="https://github.com/pakooldev/fox-macro-recorder" target="_blank" rel="noopener">
+            GitHub
+          </a>
         </nav>
       </div>
     </footer>
