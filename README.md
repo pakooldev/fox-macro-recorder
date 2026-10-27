@@ -103,6 +103,10 @@ In short: **Record → Save → Replay → Automate!**
 
 ## Installation
 
+### From Chrome Web Store
+
+[Install Fox Macro Recorder](https://chromewebstore.google.com/detail/mkckkggnhfncbmpnjebalopconahilam)
+
 ### From Source
 
 1. Download or clone this repository
@@ -111,13 +115,6 @@ In short: **Record → Save → Replay → Automate!**
 4. Click "Load unpacked"
 5. Select the `fox-macro-recorder` folder
 6. The Fox Macro Recorder icon will appear in your extensions
-
-### Required Files
-
-Make sure these icon files exist in the `icons/` folder:
-- `icon16.png` (16x16px)
-- `icon48.png` (48x48px)
-- `icon128.png` (128x128px)
 
 ## How to Use
 
@@ -331,6 +328,7 @@ fox-macro-recorder/
 ├── package.sh             # Builds dist/fox-macro-recorder-<version>.zip for the Web Store
 ├── assets/                # Font, sprites, icon sources, store art (see assets/ASSETS.md)
 ├── DESIGN.md              # Design system
+├── website/               # Next.js site (fox-macro.pakool.com): npm install && npm run dev
 └── icons/
     ├── icon16.png        # Extension icons
     ├── icon48.png
@@ -403,11 +401,13 @@ macro, automation, click recorder, task automation, productivity, testing, QA, w
 
 ## License
 
-This project is open source and available for personal and commercial use.
+MIT License. See [LICENSE](LICENSE).
+
+Bundled third-party assets keep their own licenses: the Tiny5 font ([`assets/fonts/OFL.txt`](assets/fonts/OFL.txt)), the Departure Mono font on the website ([`website/public/fonts/DepartureMono-LICENSE.txt`](website/public/fonts/DepartureMono-LICENSE.txt)), and the source icons ([`assets/icons-src/LICENSE`](assets/icons-src/LICENSE)).
 
 ## Support
 
-For issues, suggestions, or contributions, please create an issue in the repository.
+For issues, suggestions, or contributions, please create an issue or pull request in the repository. Run `npm test` (and `npm install && npm run e2e` for UI changes) before sending a pull request. For security issues, see [SECURITY.md](SECURITY.md).
 
 ### ☕ Support This Project
 
